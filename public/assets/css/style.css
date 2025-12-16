@@ -1,0 +1,1464 @@
+html{
+  height: 100%;
+}
+body {
+  padding: 0;
+  margin: 0;
+  font-family: "roboto", sans-serif;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+.container-fluid{
+  max-width: 1440px;
+  height: auto;
+  z-index: 2;
+}
+.container{
+  height: auto;
+  z-index: 2;
+}
+footer {
+  background-color:#7a8b2e;
+  color: #fff;
+  text-align:center;
+  padding: 20px 0;
+  margin-top: auto;
+}
+.row{
+  margin: 10px 0;
+}
+.titles, .h2, h2{
+  font-size: 2rem;
+  text-align: center;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  line-height: 1.8;
+  font-family: "roboto", sans-serif;
+}
+/*Barra de Navegación ======================================= */
+header{
+  height: 90px;
+  background: #fff;
+  border-bottom: 2px solid #ebebeb;
+}
+
+.inner-width{
+  max-width: 1440px;
+  padding: 0 10px;
+  margin: auto;
+}
+
+.logo{
+  float: left;
+  padding: 10px 0;
+}
+
+.logo img{
+  height: 70px;
+}
+
+.navigation-menu{
+  float: right;
+  position: relative;
+  left: auto;
+  display: flex;
+  align-items: center;
+  min-height: 90px;
+}
+.navigation-menu ul{
+  margin: 0px;
+}
+.navigation-menu li{
+  float: left;
+  display: inline-block;
+  margin-left: 10px;
+  font-size: 14px;
+  font-weight:500;
+  text-transform: capitalize;
+  letter-spacing: 0.1em;
+  padding: 10px 10px;
+  transition: .3s linear;
+}
+.navigation-menu ul li a {
+  color: #6b67ab;
+  text-decoration: none;
+}
+
+.navigation-menu ul li:hover a{
+  color: #7a8b2e;
+}
+
+.menu-toggle-btn{
+  float: right;
+  height: 90px;
+  line-height: 90px !important;
+  color: #6b67ab;
+  font-size: 32px;
+  display: none !important;
+  cursor: pointer;
+}
+@media screen and (max-width:1110px) {
+  .navigation-menu{
+    position: fixed;
+    max-width: 400px;
+    background: #6b67ab;
+    top: 90px;
+    right: 0;
+    display: none;
+    padding: 20px 0;
+    box-sizing: border-box;
+    z-index: 100;
+  }
+
+  .navigation-menu::before{
+    content: "";
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 11px solid #6b67ab;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+  }
+  .navigation-menu ul{
+      margin: 0;
+      padding: 0;
+  }
+
+  .navigation-menu li{
+    display: block;
+    width: 100%;
+    margin: 10px 0;
+    border-bottom: 1px solid #565295;
+  }
+
+  .navigation-menu ul li a {
+      color: #fff;
+      text-decoration: none;
+    }
+    .navigation-menu ul li:hover a{
+      color: #34315a;
+    }
+
+  .navigation-menu.active{
+    display: block;
+  }
+  .menu-toggle-btn{
+    display: block !important;
+  }
+  a.aj_btn {
+background: #273b91;
+color: #fff;
+font-weight: 500;
+letter-spacing: 2px;
+}
+
+a.aj_btn:hover{
+background: #fff;
+color: #273b91;
+font-weight: 500;
+letter-spacing: 2px;
+}
+}
+
+/*Formulario de Login ======================================= */
+.fondo-log{
+  background-image: url(images/background.webp);
+  background-size: cover;
+  height: 100vh;
+}
+.row.centrado {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 40px 0;
+  transform: translate(-50%, -50%);
+  width: 350px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+
+.row.centrado-error {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  padding: 40px 0;
+  transform: translate(-50%, -50%);
+  width: 750px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 5px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+}
+.card.login_card.rounded-3{
+  padding: 0px;
+  margin: 10px 0px;
+}
+.card-header h3 {
+  text-align: center;
+  text-transform: uppercase;
+  font-weight:600;
+  font-size: 16px;
+}
+.card-header{
+  text-align: center;
+}
+.card-body form{
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+form .userlog {
+  position:relative;
+  border-bottom: 2px solid #adadad;
+  margin: 30px 0;
+}
+.userlog input{
+  width: 100%;
+  padding: 0 5px;
+  height: 40px;
+  font-size: 16px;
+  border: none;
+  background: none;
+  outline: none;
+}
+.userlog label{
+  position: absolute;
+  top: 50%;
+  left: 5px;
+  color: #adadad;
+  transform: translateY(-50%);
+  font-size: 16px;
+  font-weight:600;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+.userlog span::before{
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: rgba(107, 103, 171, 1);
+}
+.userlog input:focus + label,
+.userlog input:valid + label{
+  top: -5px;
+  font-size: 14px;
+  color: #6e68b3;
+}
+
+button.btn.btn-primary.boton02{
+  text-transform: uppercase;
+  outline: 0;
+  border-radius: 30px;
+  background:   #0088d4;
+  width: 100%;
+  height: 50px;
+  border: 0;
+  padding: 15px;
+  color: #FFFFFF;
+  font-size: 14px;
+  cursor: pointer;
+}
+button.btn.btn-primary.boton02:hover, .btn.btn-warning:hover{
+  background-color: #6e68b3;
+  color: #ffffff;
+  transition: all 0.5s ease 0s;
+}
+.alert.alert-danger {
+  text-align: center;
+  margin-top: 20px;
+  color: #c80909;
+}
+
+/*Dashboard ======================================= */
+.container-fluid.dash {
+margin-top: 20px;
+margin-bottom: 20px;
+}
+.btn-card {
+  text-transform: uppercase;
+  outline: 0;
+  border-radius: 30px;
+  background: #6e68b3;
+  width: 200px;
+  height: 50px;
+  border: 0;
+  padding: 15px 20px;
+  color: #FFFFFF;
+  font-size: 14px;
+  cursor: pointer;
+}
+.btn-card:hover {
+  background-color: #7a8b2e;
+  color: #FFFFFF;
+  transition: all 0.5s ease 0s;
+}
+.card{
+  padding: 20px;
+  margin: 20px 0px;
+}
+
+/*Registrar Visitas ======================================= */
+form#f1 {
+padding: 40px 0;
+}
+input.btn.btn-secondary{
+  text-transform: uppercase;
+  border-radius: 30px;
+  background: #6e68b3;
+  width: 100%;
+  border: 0;
+  color: #FFFFFF;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: unset;
+}
+input.btn.btn-secondary:hover{
+  background-color: #7a8b2e;
+  transition: all 0.5s ease 0s;
+}
+
+.card-header {
+  padding: 0;
+  background: none;
+  border: none;
+  margin: 20px 0 0 0;
+}
+.form-group {
+margin: 10px 0;
+}
+.form-select,.form-control {
+  width: 100%;
+  height: 1.4375em;
+  padding: 5px 5px 5px 10px;
+  margin: 0px;
+  border-color: rgb(153, 153, 153);
+  border-radius: 0.5rem;
+  box-sizing: content-box;
+  -webkit-tap-highlight-color: transparent;
+  display: block;
+  min-width: 0px;
+  line-height: 1.5rem;
+  color: rgb(77, 77, 77);
+  font-weight: 500;
+}
+.form-select:focus, .form-control:focus {
+  color: #212529;
+  background-color: #fff;
+  border: rgb(153, 153, 153);
+  outline: 0;
+  box-shadow: 0 0 0 0.1rem #6e68b3;
+}
+.form-select:hover, .form-control:hover {
+  box-shadow: 0 0 0 0.1rem #6e68b3;
+}
+label.FormLabel {
+  letter-spacing: 0px;
+  padding: 0px;
+  position: relative;
+  font-size: 0.875rem;
+  display: inline-flex;
+  -webkit-box-align: center;
+  align-items: center;
+  font-weight: 500;
+  line-height: 1.25rem;
+  margin-bottom: 4px;
+  color: rgb(0, 0, 0);
+  align-self: flex-end;
+}
+.btn.btn-primary.btn-sm, .btn.btn-warning {
+  text-transform: uppercase;
+  outline: 0;
+  border-radius: 30px;
+  background: #6e68b3;
+  border: 1px solid #6e68b3;
+  padding: 10px 20px;
+  color: #FFFFFF;
+  font-size: 14px;
+  opacity: unset;
+  margin-bottom: 10px;
+}
+.btn.boton02.btn-sm, button.btn.boton02{
+  text-transform: uppercase;
+  outline: 0;
+  border: 1px solid #adadad;
+  border-radius: 30px;
+  padding: 10px 20px;
+  font-size: 14px;
+  opacity: unset;
+  margin-bottom: 10px;
+}
+.btn.boton02.btn-sm:hover, button.btn.boton02:hover{
+  background: #7a8b2e;
+  border: 1px solid #6e68b3;
+  color: #FFFFFF;
+  transition: all 0.5s ease 0s;
+}
+
+.btn.boton02.btn-sm:hover i.fas.fa-print {
+  color: #FFFFFF !important;
+}
+.btn.boton02.btn-sm:hover i.fa-solid.fa-file-excel{
+  color: #FFFFFF !important;
+}
+
+.col-6.col-md-6.col-lg-6.btnr{
+text-align: right;
+}
+.col-6.col-md-6.col-lg-6.btnl{
+text-align: left;
+}
+.separador {
+  position: relative;
+  color: #adadad;
+  text-align: center;
+  margin: 50px 0;
+  &:before,
+  &:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40%;
+    height: 1px;
+    background-color: #adadad;
+  }
+
+  &:before {
+    left: 0;
+  }
+
+  &:after {
+    right: 0;
+  }
+}
+
+/*Usuarios Registrados/Eventos ======================================= */
+.row.text-center{
+  margin-top: 40px;
+}
+.col-12.col-md-10.col-lg-10.navigation, .col-12.col-md-2.col-lg-2.navigation{
+  margin: 20px 0;
+}
+li.page-item.active {
+  --bs-pagination-active-bg: #6e68b3;
+  --bs-pagination-active-border-color: rgba(107, 103, 171, 1);
+}
+a.page-link {
+  --bs-pagination-color: #6e68b3;
+}
+.input-group-text{
+  padding: 5px 5px 5px 10px;
+}
+thead {
+  position: sticky;
+  top: 0;
+  border-bottom: 2px solid #adadad;
+  background: #0089c9;
+  color: #ffffff;
+}
+tbody, td, tfoot, th, thead, tr {
+  padding: 0.5rem 1rem !important;
+  text-transform: uppercase;
+}
+td, th{
+  text-align: left;
+}
+.tabs-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+select#can_reg {
+  padding: 0.55rem;
+}
+.input-group {
+    position: relative;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+}
+select#can_reg {
+  height: 37.6px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 80px;
+  padding: 0px 15px;
+}
+label.labmost {
+  display: flex;
+  -ms-flex-align: center;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  margin-bottom: 0;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  background-color: #6e68b3;
+  border: 1px solid #6e68b3;
+  border-radius: 0.25rem;
+}
+
+/*Color estados de tabla ======================================= */
+td.bg-danger.text-end {
+  background-color: #e74c3c !important;
+  color: #fff !important;
+}
+td.bg-warning.text-end {
+  background-color: #ffae03 !important;
+  color: #fff !important;
+}
+td.bg-success.text-end {
+  background-color: #27ae60 !important;
+  color: #fff !important;
+}
+
+/*Buscador de Personas ======================================= */
+.search {
+  width: 100%;
+  position: relative;
+  display: flex;
+}
+
+.searchpers {
+  width: 100%;
+  border: 3px solid #6e68b3;
+  border-right: none;
+  padding: 5px;
+  height: 20px;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+  color: #9DBFAF;
+  height: 37.6px;
+}
+
+.searchpers:focus{
+  color: #59539c;
+}
+
+.searchButton {
+  width: 40px;
+  height: 37.6px;
+  border: 1px solid #6e68b3;
+  background: #6e68b3;
+  text-align: center;
+  color: #fff;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 20px;
+}
+.regist-input {
+  width: fit-content;
+  padding: 7px 15px;
+  border: 1px solid #6e68b3;
+  border-radius: 5px;
+}
+/*Formulario de eventos ======================================= */
+div#evento_fechai, div#evento_fechaf {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+}
+select#evento_fechai_month, select#evento_fechai_day, select#evento_fechai_year, select#evento_fechaf_month, select#evento_fechaf_day, select#evento_fechaf_year {
+  width: 33%;
+  float: left;
+}
+
+/*Adaptaciones Mobil ======================================= */
+@media screen and (max-width:768px) {
+  tbody, td, tfoot, th, thead, tr {
+    font-size: 12px;
+  }
+  label.FormLabel.mobhid {
+    display: none;
+  }
+  .btn.boton02.btn-sm, button.btn.boton02 {
+    padding: 10px;
+    margin-bottom: 10px;
+  }
+  .col-12.col-md-6.col-lg-6.movil {
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+  }
+  .card {
+    padding: 10px;
+    margin: 10px 10px;
+  }
+  .card-header h2{
+    font-size: 24px;
+  }
+  .img-thumbnail{
+    margin-bottom: 20px;
+  }
+  .card-body{
+    padding: 0px;
+  }
+  .separador {
+    margin: 50px 0;
+    &:before,
+    &:after {
+      width: 23%;
+    }
+  }
+  .container, .container-fluid{
+    margin-bottom: 10em;
+  }
+}
+
+/*Sorteo ======================================= */
+.img-fluid.log {
+  border: 2px solid #ffffff;
+  border-radius: 0px !important;
+  width: 250px;
+  margin-top: 30px;
+}
+
+img.img-fluid.gan {
+  width: 165px;
+}
+
+label#p1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 10px 0;
+}
+
+.btn.btn.btn-boton-com {
+  text-transform: uppercase;
+  width: 100%;
+  outline: 0;
+  border-radius: 30px;
+  background: #6e68b3;
+  height: 50px;
+  border: 0;
+  padding: 16px;
+  color: #FFFFFF;
+  font-size: 14px;
+}
+
+a.btn.btn.btn-boton-com:hover {
+  background-color: #7a8b2e;
+  color: #ffffff;
+  transition: all 0.5s ease 0s;
+}
+
+/* ---------------------------------------------------*/
+/* estilos para el formulario de cotizacion */
+.disabled-link {
+    /* Estilos para que parezca deshabilitado */
+    color: #999; /* Color gris */
+    cursor: not-allowed; /* Cursor de "no permitido" */
+    text-decoration: none; /* Quitar subrayado */
+}
+
+.sombra-imagen-button {
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5); /* Sombra suave gris */
+}
+
+.imagen-link-deshabilitado {
+    opacity: 0.6; /* 60% de opacidad, 40% transparente */
+}
+
+.tabla-cotizacion{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  border-collapse: collapse;
+  width: 100% !important;
+}
+
+.tabla-cotizacion2{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  border-collapse: collapse ;
+  width: 100% !important;
+  font-size: 0.55rem !important;
+}
+
+.tr-cotizacion {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important;  
+}
+
+.tr-cotizacion2 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  height: 10px !important;
+}
+
+.tr-cotizacion-head {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 1.5rem !important; 
+  font-weight: bold !important;
+}
+
+.tabla-maestro-troqueles{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  border-collapse: collapse ;
+  width: 95% !important;
+  font-size: 0.55rem !important;
+}
+
+.tr-maestro-troqueles-head {
+  padding: 0 !important; 
+  margin: 2 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+  font-weight: bold !important;
+}
+
+
+.tr-maestro-troqueles{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+.td-maestro-troqueles {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+.tr-maestro-articulos-head {
+  padding: 0 !important; 
+  margin: 2 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+  font-weight: bold !important;
+}
+
+.tr-maestro-articulos{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+.td-maestro-articulos {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+
+.row-cotizacion {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important;  
+}
+
+.td-cotizacion {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important;  
+  font-size: 0.70rem !important;
+}
+
+.td-cotizacion2 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  height: 10px !important;
+}
+
+.td-cotizacion3 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  height: 10px !important;
+}
+
+.td-cotizacion4 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  height: 10px !important;
+  border: 0px !important;
+}
+
+.td-cotizacion5 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  height: 10px !important;
+  border: 0px !important;
+  width: 50% !important;
+}
+
+.td-cotizacion6 {
+  padding: 0 !important; 
+  margin-right: 2 !important; 
+  text-align: center !important;
+  line-height: 1 !important;  
+}
+
+.col-cotizacion {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important;  
+}
+
+.col-cotizacion2 {
+  padding: 0 !important; 
+  margin: 0 !important; 
+}
+
+
+.td-old-cotizacion {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important;  
+  font-size: 0.70rem !important;
+}
+
+/* objetos de list articulos */
+.main-container {
+    min-height: 100vh; /* Ocupa al menos toda la altura del viewport */
+    display: flex; /* Habilita flexbox para que la fila interna ocupe el espacio */
+    flex-direction: column; /* Organiza los elementos en columna */
+    padding: 20px; /* Espaciado general */
+}
+
+/* La fila que contiene las dos columnas, se estira para llenar el espacio */
+.content-row {
+    flex-grow: 1; /* Permite que esta fila ocupe todo el espacio vertical disponible */
+    display: flex; /* Asegura que las columnas internas se estiren */
+    align-items: stretch; /* Estira las columnas a la misma altura, importante para idIzq */
+    border-radius: 15px; /* Bordes redondeados para la fila */
+    /* REMOVIDO: overflow: hidden; - Esto estaba causando el problema con sticky */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* Sombra suave */
+}
+
+/* Estilos para las columnas */
+#idIzq, #idDer {
+    padding: 20px;
+    /* display: flex; flex-direction: column; se mantiene para organizar el contenido interno */
+    border-radius: 10px; /* Bordes redondeados para las columnas */
+}
+
+/* Contenedor interno de idIzq que será el que tenga el scroll */
+.scrollable-content {
+    flex-grow: 1; /* Permite que este div ocupe todo el espacio disponible */
+    overflow-y: auto; /* Habilita el scroll vertical cuando el contenido exceda */
+    padding-right: 15px; /* Espacio para la barra de scroll si aparece */
+}
+
+/* Estilos visuales para diferenciar las columnas */
+#idIzq {
+    background-color: #ffffff; /* Fondo blanco */
+    border-right: 1px solid #e0e0e0; /* Separador visual */
+    display: flex; /* Flexbox para que scrollable-content ocupe el resto del espacio */
+    flex-direction: column;
+}
+#idDer {
+    background-color: #fdfdfd; /* Fondo ligeramente diferente */
+    /* Propiedades para hacerlo flotante/sticky */
+    position: -webkit-sticky; /* Para compatibilidad con navegadores antiguos */
+    position: sticky;
+    top: 20px; /* Se pegará a 20px del tope del viewport (ajusta según el padding de main-container) */
+    align-self: flex-start; /* Alinea al inicio en el eje transversal (arriba) */
+    height: fit-content; /* La altura se ajusta a su contenido, no se estira */
+    display: flex; /* Mantener flexbox para organizar su contenido */
+    flex-direction: column;
+}
+
+/* Estilos para el contenido de ejemplo */
+.example-text {
+    line-height: 1.6;
+    margin-bottom: 1em;
+    color: #333;
+}
+
+/* Estilos para las tarjetas de elementos clicables en idIzq */
+.item-card {
+    background-color: #f8f9fa;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.item-card:hover {
+    background-color: #e9ecef;
+    border-color: #c0c0c0;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.item-card.active {
+    background-color: #e0f2f7; /* Azul claro para el estado activo */
+    border-color: #007bff; /* Borde azul primario */
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.2);
+}
+
+.item-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #343a40;
+    margin-bottom: 5px;
+}
+
+.item-card p {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.btn-cotizacion1 {
+  font-size: .65rem !important;
+  background-color: #0089c9;
+  color : #fff;
+  height: 25px !important;
+}
+
+.btn-cotizacion2 {
+  font-size: .65rem !important;
+  height: 25px !important;
+  background-color: #3d9dca;
+  color : #fff;  
+}
+
+.btn-cotizacion3 {
+  font-size: .65rem !important;
+  height: 25px !important;
+  background-color:  #73afca;
+  color : #fff;   
+}
+
+.btn-cotizacion-danger1 {
+  font-size: .65rem !important;
+  background-color: #ff0000;
+  color : #fff;
+  height: 25px !important;
+}
+
+/*---- estilos para las busquesas dentro de cotizacion ---*/
+  tr:hover {
+      background-color: #f5f5f5;
+  }
+  /* Opcional: Estilo para resaltar la fila encontrada */
+  tr.highlight {
+      background-color: #e0ffe0; /* Verde claro */
+      transition: background-color 0.5s ease;
+  }
+  tr.highlight td {
+      font-weight: bold;
+  }
+
+/* estilo para botones de flitrado de cotizacion **/
+/*-----------------------------------------------------*/
+.btn-custom {
+  /* Estilos adicionales para redondear el botón y darle un poco más de espacio */
+  border-radius: 0.75rem; /* Bordes más redondeados */
+  padding: 1rem 2rem; /* Más padding para un botón más grande */
+  font-size: 1.25rem; /* Tamaño de fuente un poco más grande */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1); /* Sombra sutil */
+  transition: all 0.3s ease; /* Transición suave para efectos hover */
+}
+.btn-custom:hover {
+    transform: translateY(-2px); /* Pequeño efecto de elevación al pasar el ratón */
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+.btn-custom i {
+    margin-bottom: 0.5rem; /* Espacio entre el icono y el texto */
+    font-size: 1.75rem; /* Tamaño del icono */
+}
+
+/* Estilos para centrar el contenido de las columnas */
+.col-center-content {
+    display: flex;
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan si no hay suficiente espacio */
+    margin:auto !important
+}
+
+/* Ajuste para el botón de Blanquear */
+.btn-blanquear {
+    padding: 1rem 2rem; /* Consistencia en el padding */
+    font-size: 1.25rem; /* Consistencia en el tamaño de fuente */
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    margin: 0.5rem; /* Espacio entre botones */
+    background:#343a40 !important ; /* definimos un color especializado para el fondo*/
+    color : #FFF !important;
+}
+.btn-blanquear:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.monto_resaltado{
+  font-size: 0.75rem !important;
+  font-weight: bold !important;
+}
+/*-----------------------------------------------------*/
+/*---- estos estilos los aplicamos a procesos especiales uno ----*/
+/* Estilos para los links de navegacion inactivos */
+.nav-personalizado {
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    border-top-left-radius: 15px !important;
+    border-top-right-radius:15px !important;    
+    color: #000 !important; 
+}
+
+/* Estilos específicos para cada nav-item con sus colores de fondo */
+.nav-item-general {
+    background-color: #8c8c8c !important;
+    margin-right: 0.25rem;
+    border-top-left-radius: 15px !important;
+    border-top-right-radius:15px !important;  
+    color: #000 !important;   
+}
+
+.nav-item-presentacion {
+    background-color: #a6a6a6 !important;
+    margin-right: 0.25rem;
+    border-top-left-radius: 15px !important;
+    border-top-right-radius:15px !important; 
+    color: #000 !important;     
+}
+.nav-item-costos {
+  background-color: #bfbfbf !important;
+  margin-right: 0.25rem;
+  border-top-left-radius: 15px !important;
+  border-top-right-radius:15px !important;     
+  color: #000 !important; 
+}
+.nav-item-resumen {
+  background-color: #e6e6e6 !important;
+  border-top-left-radius: 15px !important;
+  border-top-right-radius:15px !important; 
+  color: #000 !important;         
+}
+
+/* Estilos para los links de navegación */
+.nav-enlace-personalizado {
+  font-weight: normal !important;
+  font-style: normal !important;
+  padding: 0.75rem 1rem;
+  display: block;
+  color: #ffffff !important; /* Color de link inactivo: blanco para los fondos oscuros */
+  transition: all 0.2s ease-in-out;
+  text-decoration: none !important;
+}
+
+/* Estilos específicos para el link del Resumen, con fondo claro */
+.nav-item-resumen .nav-enlace-personalizado {
+  color: #333333 !important; /* Texto oscuro para el fondo claro */
+}
+
+/* Estilos para los links de navegacion activos */
+.nav-enlace-personalizado.active {
+    font-weight: bold !important;
+    font-style: normal !important;
+    font-size: 1.25rem !important;
+    text-decoration: underline !important;
+    color:#000 !important;
+}
+
+/* Cuando el mouse pasa sobre el link (hover) */
+.nav-enlace-personalizado:hover {
+    opacity: 0.8 !important; /* Efecto sutil de opacidad en hover */
+    color: #fff !important;
+}
+
+.label-process-one {
+  color: #000000 !important;
+  font-size: 0.75rem !important;
+  height: 0.75rem !important;
+  padding: 0px !important;
+  margin: 0px !important;  
+}
+
+.label2-process-one {
+  color: #fff !important;
+  font-size: .65rem !important;
+}
+
+.label3-process-one {
+  color: #000 !important;
+  font-size: 0.75rem !important;
+}
+
+.label4-process-one {
+  color: #000 !important;
+  font-size: .70rem !important;
+}
+
+.label4-process-one-general {
+  color: #000 !important;
+  font-size: .70rem !important;
+  height: 0.70rem !important;
+  padding: 0px !important;
+  margin: 0px !important;  
+}
+
+.label4-process-one-resumen {
+  color: #000 !important;
+  font-size: .70rem !important;
+  height:0.7rem !important; 
+  padding:0 !important; 
+  margin:0px !important;
+  font-weight: bold !important;
+}
+
+.row-process-one-resumen {
+  height:3.5rem !important; 
+  padding:0 !important; 
+  margin-bottom:15px !important;
+  margin-top: 0px !important;  
+  margin-left: 0px !important;
+  margin-right: 0px !important;
+}
+
+.label5-process-one {
+  color: #000 !important;
+  font-size: .65rem !important;
+}
+
+.label5-process-one-resumen {
+  color: #000 !important;
+  font-size: .65rem !important;
+  height: 0.7rem !important;
+  padding: 0px !important;
+  margin: 0px !important;
+}
+
+.form-group-spe1{
+  inline-size: 0.75rem !important;
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.form-group-spe2{
+  margin-top: 0.25rem !important;
+  margin-bottom: 0.25rem !important;
+}
+
+.row-resumen-spe1{
+  
+}
+
+.blue-box {
+    background-color: #80ffff; /* Un azul claro similar al de la imagen */
+    height: 50px;
+    width: 100%;
+    border: 1px solid #039be5;
+    align-items: center !important;
+}
+
+.blue-box img {
+  width: 100% !important; /* La imagen ocupará el 100% del ancho del contenedor */
+  height: 100% !important; /* La imagen ocupará el 100% de la altura del contenedor */
+  object-fit: contain !important; /* Esto es clave:
+                       - 'cover': la imagen cubrirá todo el área, recortando las partes extra si es necesario.
+                       - 'contain': la imagen se ajustará completamente dentro del área, manteniendo su proporción, pero podría dejar espacios vacíos.
+                       Elige 'cover' si quieres que cubra todo el espacio.
+                     */
+  display: block; /* Elimina cualquier espacio extra que algunos navegadores puedan añadir a las imágenes */
+}
+
+/*---- este estilo se usa para la botonera de los procesos especiales ------*/
+.shadow-white {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+}
+
+.shadow-red {
+    box-shadow: 0 0 10px rgba(255,0, 0, 0.7);
+}
+
+
+.fixed-top-section {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #91b1d1; /* Opcional: define un color de fondo para que el contenido debajo no se muestre a través del div */
+    z-index: 1030; /* Es importante usar un z-index alto para que esté por encima de otros elementos de la página */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* Opcional: agrega una sombra sutil para un mejor efecto visual */
+    /*padding: 10px; /* Opcional: agrega un poco de espacio alrededor del contenido */
+}
+
+.sticky-footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background-color: #333;
+  color: white;
+  text-align: center;
+  padding: 15px;
+  z-index: 10000;
+}
+
+.option-normal {
+  color: #28a745 !important;
+  font-weight: bold;
+}
+
+.option-urgente {
+  color: #dc3545  !important;
+  font-weight: bold;
+}
+
+/*---- estilos para los cuadro de texto de resumen ----*/
+.bg-red {
+    background-color: #ffcccc; /* Rojo claro */
+}
+.bg-yellow {
+    background-color: #ffffcc; /* Amarillo claro */
+}
+.bg-green {
+    background-color: #ccffcc; /* Verde claro */
+}
+.bg-blue {
+    background-color: #80ffff; /* Verde claro */
+}
+
+
+/*----- fin proceso especiales uno -------*/
+/*--------- estilos para cotizaciones eanteriores del cliente -----*/
+.gradiente-body0{
+  background: #4b81b7;
+  background: linear-gradient(180deg,rgba(75, 129, 183, 1) 0%, rgba(255, 255, 255, 0.53) 79%);
+}
+
+.gradiente-body1{
+  background: #91b1d1;
+  background: linear-gradient(180deg,rgba(145, 177, 209, 1) 0%, rgba(255, 255, 255, 0.53) 79%);
+}
+
+.gradiente-body2{
+  background: #C2D0DE;
+  background: linear-gradient(180deg,rgba(194, 208, 222, 1) 0%, rgba(255, 255, 255, 0.53) 79%);
+}
+
+.gradiente-body3{
+  background: #C2D0DE;
+  background: linear-gradient(180deg,rgba(194, 208, 222, 1) 0%, rgba(255, 255, 255, 0.53) 79%);
+  width: 100% !important;
+  padding : 0 !important;
+  margin: auto !important;
+}
+
+
+
+/*--------- estilos para cotizaciones eanteriores del cliente -----*/
+/*------------- esta clase afecta los links dentro del maestro de materiales ----*/
+/*
+ * Esta clase afecta solo a los enlaces dentro de un contenedor
+ * que tenga la clase 'link-negro-contenedor'.
+ */
+.link-negro-contenedor a:link,
+.link-negro-contenedor a:visited,
+.link-negro-contenedor a:hover,
+.link-negro-contenedor a:active {
+    color: #000000 !important; /* Color negro */
+    text-decoration: none !important; /* Opcional: para quitar el subrayado */
+}
+
+/*------------ esta estilo se usa para ajustar la imagen en el maestro de troqueles -------*/
+.imagen-responsive-troquel {
+  max-width: 100%; /* La imagen no superará el 100% del ancho de su contenedor */
+  height: auto;    /* La altura se ajusta automáticamente para mantener la proporción */
+  display: block;  /* Opcional: Para evitar espacios en blanco debajo de la imagen */
+}
+
+/*----- procesos especiales ---*/
+.tabla-procesos_especiales{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  border-collapse: collapse ;
+  width: 95% !important;
+  font-size: 0.95rem !important;
+}
+
+
+.tr-procesos-especiales{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+.td-procesos-especiales {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.65rem !important; 
+}
+
+/*-- Estilos para el formulario de cotización seccion adicionales --*/
+/* Estilos para que los inputs se alineen correctamente */
+.input-group-custom {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.input-group-custom label {
+    width: 100px; /* Ancho fijo para las etiquetas del lado izquierdo */
+    margin-right: 10px;
+    text-align: right;
+    font-weight: 500;
+}
+.input-group-custom .form-control {
+    flex-grow: 1;
+}
+/* Estilo para los recuadros de la sección "Consultar" */
+.consulta-box {
+    border: 1px solid #ccc !important;
+    background-color: #f0f0f0 !important;
+    padding: 15px !important;
+    margin-bottom: 10px !important;
+    border-radius: 6px !important;
+    box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1) !important;
+    text-align: center !important;
+    font-weight: 600 !important;
+    color: #555 !important;
+}
+
+/* input para la cotizacion generales */
+.especialHeight{
+  line-height: 1rem !important;
+}
+
+/*--- estilos para los procesos de pedidos ------*/
+.tr-planificacion-head {
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  font-weight: bold !important;
+}
+
+/*--- < 3 horas de haber sido aprobada ----*/
+.tr-planificacion-0{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #FFFFFF !important;
+}
+
+/*--- 3 a 6 horas de haber sido aprobada ----*/
+.tr-planificacion-a{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #00fbf4 !important;
+}
+
+/*--- 6 a 9 horas de haber sido aprobada ----*/
+.tr-planificacion-b{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #01faad !important;
+}
+
+/*--- 9 a 12 horas de haber sido aprobada ----*/
+.tr-planificacion-c{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #0bc101 !important;
+}
+
+/*--- 12 a 15 horas de haber sido aprobada ----*/
+.tr-planificacion-d{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #bafe2e !important;
+}
+
+/*--- 15 a 18 horas de haber sido aprobada ----*/
+.tr-planificacion-e{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #fff259 !important;
+}
+
+
+/*--- 18 a 21 horas de haber sido aprobada ----*/
+.tr-planificacion-f{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #fec95a !important;
+}
+
+/*--- > 21 horas de haber sido aprobada ----*/
+.tr-planificacion-g{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+  background-color: #e10000 !important;
+  color:#FFFFFF !important
+}
+
+.tr-planificacion-0 a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-a a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+.tr-planificacion-b a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-c a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-d a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-e a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-f a {
+  color: #000000 !important; /* Establece el color de la fuente a blanco */
+  text-decoration: none !important;
+}
+
+.tr-planificacion-g a {
+  color: #FFFFFF !important; /* Establece el color de la fuente a blanco */
+}
+
+
+
+
