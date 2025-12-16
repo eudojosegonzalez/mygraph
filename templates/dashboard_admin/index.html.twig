@@ -38,9 +38,51 @@
                 </div>
             </div>
         </div>
-     
+        <div class="row" >
+            <div class="col-11 col-md-6 col-lg-6 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
+                <table class="table table-bordered table-striped table-hover" style="width: 85% !important;">
+                    <thead class="thead-dark text-white">
+                        <tr class='tr-planificacion-head text-center'>
+                            <th scope="col">Mes</th>
+                            <th scope="col" class="d-none d-md-table-cell">Cotizaciones</th>
+                            <th scope="col" class="d-none d-md-table-cell">Órdenes</th>
+                            <th scope="col">En Producción</th>
+                            <th scope="col">Terminados</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for resumen in resumenProduccion %}
+                        <tr class='tr-planificacion-h'>
+                            <td >{{ resumen.mes }}</td>
+                            <td class='text-center d-none d-md-table-cell'>{{ resumen.cotizaciones }}</td>
+                            <td class='text-center d-none d-md-table-cell' >{{ resumen.ordenes }}</td>
+                            <td class='text-center'>{{ resumen.enproduccion }}</td>
+                            <td class='text-center'>{{ resumen.terminados }}</td>
+                        </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4">No hay datos disponibles</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
     <script>
- 
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
     </script>
 {% endblock %}

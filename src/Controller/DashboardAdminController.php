@@ -33,10 +33,39 @@ final class DashboardAdminController extends AbstractController
         $colorSeparator=$this->getParameter('colorSeparator');
         $appLogo=$this->getParameter('logo');
 
+        // buscamos los datos estadísticos de las produccion
+        $resumenProduccion=[];
+       $elemento=[
+            "mes"=>"Noviembre 2025",
+            "cotizaciones"=>12,
+            "ordenes"=>10,
+            "enproduccion"=>8,
+            "terminados"=>2
+        ];
+        array_push($resumenProduccion,$elemento);
+
+        $elemento=[
+            "mes"=>"Diciembre 2025",
+            "cotizaciones"=>15,
+            "ordenes"=>15,
+            "enproduccion"=>3,
+            "terminados"=>12
+        ];
+        array_push($resumenProduccion,$elemento);
+
+        $elemento=[
+            "mes"=>"Enero 2026",
+            "cotizaciones"=>10,
+            "ordenes"=>5,
+            "enproduccion"=>3,
+            "terminados"=>2
+        ];
+        array_push($resumenProduccion,$elemento);
 
         return $this->render('dashboard_admin/index.html.twig', [
             'controller_name' => 'DashboardAdminController',
-            'logo'=>$appLogo
+            'logo'=>$appLogo,
+            'resumenProduccion'=>$resumenProduccion
         ]);
     }
 }

@@ -1459,6 +1459,13 @@ a.btn.btn.btn-boton-com:hover {
   color: #FFFFFF !important; /* Establece el color de la fuente a blanco */
 }
 
+.tr-planificacion-h{
+  padding: 0 !important; 
+  margin: 0 !important; 
+  line-height: 1 !important; 
+  font-size : 0.75rem !important; 
+}
+
 
 
 
