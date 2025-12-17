@@ -1,54 +1,118 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User{% endblock %}
+{% block title %}User index{% endblock %}
 
 {% block body %}
-    <h1>User</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user-circle mr-1"></i> Perfil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog mr-1"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt mr-1"></i> Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <!-- Sidebar -->
+    {% include 'navigation_admin.html.twig' %}
+    <!-- Contenido Principal -->
+    <div id="content">
+        <div class="row" style="padding-top:50px !important">
+            <div class="col-11 col-md-5 col-lg-5 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
+                <div class='text-right'>
+                    <a href="{{ path('app_user_index') }}" title="Regresar al Listado"><i class="fa-solid fa-list"></i></a>
+                </div>
+                <div class='card'>
+                    <div class='card-header'>
+                        <h2>Datos del Usuario</h2>
+                    </div>
+                    <div class='card-body'>
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Id</th>
+                                    <td>{{ user.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>{{ user.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Roles</th>
+                                    <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Name</th>
+                                    <td>{{ user.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Telefono</th>
+                                    <td>{{ user.telefono }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Nivel</th>
+                                    <td>
+                                        {% if (user.nivel == 10) %}
+                                            Consultor
+                                        {% elseif (user.nivel == 30) %}
+                                            Operador
+                                        {% elseif (user.nivel == 99) %}
+                                            Administrador
+                                        {% endif %}                                             
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Estado</th>
+                                    <td>
+                                        {% if (user.estado =="1") %}
+                                            Activo
+                                        {% else %}
+                                            Inactivo
+                                        {% endif %}                                            
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha_creacion</th>
+                                    <td>{{ user.fechaCreacion ? user.fechaCreacion|date('d/m/Y') : '' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="text-right">
+                            <a href="{{ path('app_user_edit', {'id': user.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ user.id }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user.email }}</td>
-            </tr>
-            <tr>
-                <th>Roles</th>
-                <td>{{ user.roles ? user.roles|json_encode : '' }}</td>
-            </tr>
-            <tr>
-                <th>Password</th>
-                <td>{{ user.password }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ user.name }}</td>
-            </tr>
-            <tr>
-                <th>Telefono</th>
-                <td>{{ user.telefono }}</td>
-            </tr>
-            <tr>
-                <th>Nivel</th>
-                <td>{{ user.nivel }}</td>
-            </tr>
-            <tr>
-                <th>Estado</th>
-                <td>{{ user.estado }}</td>
-            </tr>
-            <tr>
-                <th>Fecha_creacion</th>
-                <td>{{ user.fechaCreacion ? user.fechaCreacion|date('Y-m-d') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_user_index') }}">back to list</a>
-
-    <a href="{{ path('app_user_edit', {'id': user.id}) }}">edit</a>
-
-    {{ include('user/_delete_form.html.twig') }}
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
+    </script>
 {% endblock %}

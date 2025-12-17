@@ -187,4 +187,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+
+    // Registra el método mágico para imprimir el nombre del estado, por ejemplo, California
+    public function __toString()
+    {
+        return $this->name;
+    }
+
 }
