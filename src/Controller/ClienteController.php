@@ -17,8 +17,15 @@ final class ClienteController extends AbstractController
     #[Route(name: 'app_cliente_index', methods: ['GET'])]
     public function index(ClienteRepository $clienteRepository): Response
     {
+        $fontSize= $this->getParameter('fontSize');
+        $iconsWidthSize=$this->getParameter('iconsWidthSize');
+        $iconsHeightSize=$this->getParameter('iconsHeightSize');
+        $sizeSeparador=$this->getParameter('sizeSeparador');
+        $colorSeparator=$this->getParameter('colorSeparator');
+        $appLogo=$this->getParameter('logo');        
         return $this->render('cliente/index.html.twig', [
             'clientes' => $clienteRepository->findAll(),
+             'logo'=>$appLogo,
         ]);
     }
 
@@ -28,6 +35,12 @@ final class ClienteController extends AbstractController
         $cliente = new Cliente();
         $form = $this->createForm(ClienteType::class, $cliente);
         $form->handleRequest($request);
+        $fontSize= $this->getParameter('fontSize');
+        $iconsWidthSize=$this->getParameter('iconsWidthSize');
+        $iconsHeightSize=$this->getParameter('iconsHeightSize');
+        $sizeSeparador=$this->getParameter('sizeSeparador');
+        $colorSeparator=$this->getParameter('colorSeparator');
+        $appLogo=$this->getParameter('logo');           
 
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->persist($cliente);
@@ -39,14 +52,22 @@ final class ClienteController extends AbstractController
         return $this->render('cliente/new.html.twig', [
             'cliente' => $cliente,
             'form' => $form,
+             'logo'=>$appLogo,
         ]);
     }
 
     #[Route('/{id}', name: 'app_cliente_show', methods: ['GET'])]
     public function show(Cliente $cliente): Response
     {
+        $fontSize= $this->getParameter('fontSize');
+        $iconsWidthSize=$this->getParameter('iconsWidthSize');
+        $iconsHeightSize=$this->getParameter('iconsHeightSize');
+        $sizeSeparador=$this->getParameter('sizeSeparador');
+        $colorSeparator=$this->getParameter('colorSeparator');
+        $appLogo=$this->getParameter('logo');           
         return $this->render('cliente/show.html.twig', [
             'cliente' => $cliente,
+             'logo'=>$appLogo,
         ]);
     }
 
@@ -55,7 +76,12 @@ final class ClienteController extends AbstractController
     {
         $form = $this->createForm(ClienteType::class, $cliente);
         $form->handleRequest($request);
-
+        $fontSize= $this->getParameter('fontSize');
+        $iconsWidthSize=$this->getParameter('iconsWidthSize');
+        $iconsHeightSize=$this->getParameter('iconsHeightSize');
+        $sizeSeparador=$this->getParameter('sizeSeparador');
+        $colorSeparator=$this->getParameter('colorSeparator');
+        $appLogo=$this->getParameter('logo');   
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
@@ -65,6 +91,7 @@ final class ClienteController extends AbstractController
         return $this->render('cliente/edit.html.twig', [
             'cliente' => $cliente,
             'form' => $form,
+             'logo'=>$appLogo,
         ]);
     }
 

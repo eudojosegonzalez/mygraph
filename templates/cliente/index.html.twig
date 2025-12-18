@@ -1,49 +1,106 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Cliente index{% endblock %}
+{% block title %}User index{% endblock %}
 
 {% block body %}
-    <h1>Cliente index</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user-circle mr-1"></i> Perfil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog mr-1"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt mr-1"></i> Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <!-- Sidebar -->
+    {% include 'navigation_admin.html.twig' %}
+    <!-- Contenido Principal -->
+    <div id="content">
+        <div class='row' style="padding-top:50px !important">
+            <div class='col-12 col-md-12 col-lg-12'>
+                <div class="container-fluid p-4">
+                    <h2>Clientes en el Sistema</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-11 col-md-8 col-lg-8 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
+                <div class='text-right'>
+                    <a href="{{ path('app_cliente_new') }}" title='Nuevo Cliente'><i class="fa-solid fa-user-plus"></i></a>
+                </div>
+                    <table class="table table-bordered table-striped table-hover" style="width: 85% !important;">
+                            <thead class="thead-dark text-white">
+                                <tr class='tr-planificacion-head text-center'>
+                                    <th>Id</th>
+                                    <th>Nombre</th>
+                                    <th class='text-center d-none d-md-table-cell'>Documento</th>
+                                    <th class='text-center d-none d-md-table-cell'>Direccion</th>
+                                    <th>Teléfono</th>
+                                    <th class='text-center d-none d-md-table-cell'>Email</th>
+                                    <th class='text-center d-none d-md-table-cell'>Estado</th>
+                                    <th class='text-center d-none d-md-table-cell'>Fecha Creación</th>
+                                    <th>Proyectos</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% set i = 1 %}
+                            {% for cliente in clientes %}
+                                <tr>
+                                    <td>{{ i }}</td>
+                                    <td>{{ cliente.nombre }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.tipoDoc ~ "-" ~ cliente.documento }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.direccion }}</td>
+                                    <td>{{ cliente.telefono }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.email }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.estado }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.fechaCreacion ? cliente.fechaCreacion|date('d/m/Y') : '' }}</td>
+                                    <td class='text-center'>0</td>
+                                    <td>
+                                        <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    </td>
+                                </tr>
+                                {% set i = i + 1 %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="10" class='text-danger'>No se han definido clientes en el sistema</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+            </div>
+        </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nombre</th>
-                <th>Tipo_doc</th>
-                <th>Documento</th>
-                <th>Direccion</th>
-                <th>Telefono</th>
-                <th>Email</th>
-                <th>Estado</th>
-                <th>Fecha_creacion</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for cliente in clientes %}
-            <tr>
-                <td>{{ cliente.id }}</td>
-                <td>{{ cliente.nombre }}</td>
-                <td>{{ cliente.tipoDoc }}</td>
-                <td>{{ cliente.documento }}</td>
-                <td>{{ cliente.direccion }}</td>
-                <td>{{ cliente.telefono }}</td>
-                <td>{{ cliente.email }}</td>
-                <td>{{ cliente.estado }}</td>
-                <td>{{ cliente.fechaCreacion ? cliente.fechaCreacion|date('Y-m-d') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}">show</a>
-                    <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="10">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-
-    <a href="{{ path('app_cliente_new') }}">Create new</a>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
+    </script>
 {% endblock %}
