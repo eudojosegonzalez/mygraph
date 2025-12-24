@@ -1,0 +1,6 @@
+<form method="post" action="{{ path('app_inventario_delete', {'id': inventario.id}) }}" onsubmit="return confirm('Desea eliminar este material, esta acción es irreversible?');">
+    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ inventario.id) }}">
+    <div class='text-right'>
+        <button class="btn btn-danger">Eliminar</button>
+    </div>
+</form>

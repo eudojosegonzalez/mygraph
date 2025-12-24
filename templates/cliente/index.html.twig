@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Clientes{% endblock %}
 
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -77,16 +77,22 @@
                             <tr class='tr-planificacion-h'>
                                 <td>{{ i }}</td>
                                 <td>{{ cliente.nombre }}</td>
-                                <td class='text-center d-none d-md-table-cell'>{{ cliente.tipoDoc ~ "-" ~ cliente.documento }}</td>
-                                <td class='text-center d-none d-md-table-cell'>{{ cliente.direccion }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.tipoDoc ~ "-" ~ cliente.documento }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.direccion }}</td>
                                 <td>{{ cliente.telefono }}</td>
-                                <td class='text-center d-none d-md-table-cell'>{{ cliente.email }}</td>
-                                <td class='text-center d-none d-md-table-cell'>{{ cliente.estado }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.email }}</td>
+                                <td class='text-center d-none d-md-table-cell'>
+                                    {% if (cliente.estado =="1") %}
+                                        <span class='text-success'>Activo</span>
+                                    {% else %}
+                                         <span class='text-danger'>Inactivo</span>
+                                    {% endif %}                                        
+                                </td>
                                 <td class='text-center d-none d-md-table-cell'>{{ cliente.fechaCreacion ? cliente.fechaCreacion|date('d/m/Y') : '' }}</td>
                                 <td class='text-center'>0</td>
                                 <td class='text-center'>
-                                    <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}"><i class="fa-solid fa-eye"></i></a>
-                                    <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}" title='Ver detalles del cliente'><i class="fa-solid fa-eye"></i></a>
+                                    <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}" title='Actualizar datos del cliente'><i class="fa-regular fa-pen-to-square"></i></a>
                                 </td>
                             </tr>
                             {% set i = i + 1 %}
