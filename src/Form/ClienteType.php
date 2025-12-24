@@ -48,7 +48,7 @@ class ClienteType extends AbstractType
                 'estado',
                 ChoiceType::class,
                 [
-                    'label' => 'Estado del Usuario',
+                    'label' => 'Estado del Cliente',
                     'required' => true,
                     'multiple' => false,
                     'expanded' => false,

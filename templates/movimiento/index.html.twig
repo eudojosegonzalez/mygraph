@@ -1,0 +1,151 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Movimiento de Inventario{% endblock %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user-circle mr-1"></i> Perfil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog mr-1"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt mr-1"></i> Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <!-- Sidebar -->
+    {% include 'navigation_admin.html.twig' %}
+    <!-- Contenido Principal -->
+    <div id="content">
+        <div class='container-fluid'>
+            <div class='row' style="margin:auto !important; padding-top:50px !important">
+                <div class='col-12 col-md-12 col-lg-12 text-center'>
+                    <h2>Movimiento de Materiales del Sistema</h2>
+                </div>
+            </div>
+            <div class="container mt-3">
+                {# 'app.flashes' devuelve un array de arrays #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>            
+            <div class="row"  style="margin:auto !important;">
+                <div class="col-12 col-md-12 col-lg-12 text-right">
+                    <a href="{{ path('app_movimiento_new') }}" title='Nuevo Movimiento de Material'><i class="fa-regular fa-square-plus"></i></a>
+                </div>
+            </div>
+            <div class="row"  style="margin:auto !important;">
+                <div class="col-12 col-md-12 col-lg-12 text-center" >
+                    <table class="table table-bordered table-striped table-hover" >
+                        <thead class="thead-dark text-white">
+                            <tr class='tr-planificacion-head text-center'>
+                                <th>Id</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th class='text-center d-none d-md-table-cell'>Inicial</th>
+                                <th class='text-center d-none d-md-table-cell'>Final</th>
+                                <th class='text-center d-none d-md-table-cell'>Usuario</th>
+                                <th class='text-center d-none d-md-table-cell'>Proyecto</th>
+                                <th class='text-center d-none d-md-table-cell'>Documento</th>
+                                <th class='text-center d-none d-md-table-cell'>Estado</th>
+                                <th lass='text-center d-none d-md-table-cell'>Fecha del Movimiento</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set i = 1 %}
+                            {% for movimiento in movimientos %}
+                                <tr class='tr-planificacion-h'>
+                                    <td>{{ movimiento.id }}</td>
+                                    <td>{{ movimiento.tipo }}</td>
+                                    <td>{{ movimiento.cantidad }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.inicial }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.final }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.proyecto }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.user.nombre }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.documento }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (movimiento.estado =="1") %}
+                                            <span class='text-success'>Activo</span>
+                                        {% else %}
+                                            <span class='text-danger'>Inactivo</span>
+                                        {% endif %}                                              
+
+                                    </td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.fechaAct ? movimiento.fechaAct|date('Y-m-d H:i:s') : '' }}</td>
+                                    <td>
+                                        <a href="{{ path('app_movimiento_show', {'id': movimiento.id}) }}"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="{{ path('app_movimiento_edit', {'id': movimiento.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                                    </td>
+                                </tr>
+                                {% set i = i + 1 %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="11" class='text-danger'>No se han encontrado movimiento de materiales en el sistema</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>                     
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
+
+        function importarClientes() {
+            $('#miModalUploadClient').modal('show');
+        }
+    </script>
+{% endblock %}
+{% block modales %}
+    <!-- cuadro modal  de anuncios -->
+    <div class="modal fade" id="miModal" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Título del Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal()">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Aquí va el contenido de tu modal. Puedes incluir texto, imágenes, formularios, ¡lo que necesites!
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

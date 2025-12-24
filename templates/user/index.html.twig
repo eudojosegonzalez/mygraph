@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Usuarios{% endblock %}
 
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -60,7 +60,7 @@
                     <tbody>
                         {% set i = 1 %}
                         {% for user in users %}
-                        <tr>
+                        <tr class='tr-planificacion-h'>
                             <td>{{ i }}</td>
                             <td>{{ user.name }}</td>
                             <td class='text-center d-none d-md-table-cell'>{{ user.email }}</td>
@@ -76,16 +76,16 @@
                             </td>
                             <td class='text-center d-none d-md-table-cell'>
                                 {% if (user.estado =="1") %}
-                                    Activo
+                                     <span class='text-success'>Activo</span>
                                 {% else %}
-                                    Inactivo
+                                     <span class='text-danger'>Inactivo</span>
                                 {% endif %}                                
                             </td>
                             <td class='text-center d-none d-md-table-cell'>{{ user.fechaCreacion ? user.fechaCreacion|date('d/m/Y') : '' }}</td>
                             <td class='text-center d-none d-md-table-cell'>{{ user.roles ? user.roles|json_encode : '' }}</td>
                             <td class='text-center'>
-                                <a href="{{ path('app_user_show', {'id': user.id}) }}"><i class="fa-solid fa-eye"></i></a>
-                                <a href="{{ path('app_user_edit', {'id': user.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                                <a href="{{ path('app_user_show', {'id': user.id}) }}" title='Ver detalles del Usuario'><i class="fa-solid fa-eye"></i></a>
+                                <a href="{{ path('app_user_edit', {'id': user.id}) }}" title='Editar detalles del cliente'><i class="fa-regular fa-pen-to-square"></i></a>
                             </td>
                         </tr>
                         {% set i = i + 1 %}

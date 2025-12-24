@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}User index{% endblock %}
+{% block title %}Clientes{% endblock %}
 
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -31,62 +31,82 @@
     {% include 'navigation_admin.html.twig' %}
     <!-- Contenido Principal -->
     <div id="content">
-        <div class='row' style="padding-top:50px !important">
-            <div class='col-12 col-md-12 col-lg-12'>
-                <div class="container-fluid p-4">
+        <div class='container-fluid'>
+            <div class='row' style="margin:auto !important; padding-top:50px !important">
+                <div class='col-12 col-md-12 col-lg-12 text-center'>
                     <h2>Clientes en el Sistema</h2>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col-11 col-md-8 col-lg-8 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
-                <div class='text-right'>
+            <div class="container mt-3">
+                {# 'app.flashes' devuelve un array de arrays #}
+                {% for label, messages in app.flashes %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endfor %}
+            </div>            
+            <div class="row"  style="margin:auto !important;">
+                <div class="col-12 col-md-12 col-lg-12 text-right">
+                    <a href="javascript:importarClientes()" title='Importar Clientes'><i class="fa fa-upload" aria-hidden="true"></i></a>
                     <a href="{{ path('app_cliente_new') }}" title='Nuevo Cliente'><i class="fa-solid fa-user-plus"></i></a>
                 </div>
-                    <table class="table table-bordered table-striped table-hover" style="width: 85% !important;">
-                            <thead class="thead-dark text-white">
-                                <tr class='tr-planificacion-head text-center'>
-                                    <th>Id</th>
-                                    <th>Nombre</th>
-                                    <th class='text-center d-none d-md-table-cell'>Documento</th>
-                                    <th class='text-center d-none d-md-table-cell'>Direccion</th>
-                                    <th>Teléfono</th>
-                                    <th class='text-center d-none d-md-table-cell'>Email</th>
-                                    <th class='text-center d-none d-md-table-cell'>Estado</th>
-                                    <th class='text-center d-none d-md-table-cell'>Fecha Creación</th>
-                                    <th>Proyectos</th>
-                                    <th>Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% set i = 1 %}
-                            {% for cliente in clientes %}
-                                <tr>
-                                    <td>{{ i }}</td>
-                                    <td>{{ cliente.nombre }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.tipoDoc ~ "-" ~ cliente.documento }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.direccion }}</td>
-                                    <td>{{ cliente.telefono }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.email }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.estado }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cliente.fechaCreacion ? cliente.fechaCreacion|date('d/m/Y') : '' }}</td>
-                                    <td class='text-center'>0</td>
-                                    <td>
-                                        <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}"><i class="fa-solid fa-eye"></i></a>
-                                        <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
-                                    </td>
-                                </tr>
-                                {% set i = i + 1 %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="10" class='text-danger'>No se han definido clientes en el sistema</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
             </div>
-        </div>
+            <div class="row"  style="margin:auto !important;">
+                <div class="col-12 col-md-12 col-lg-12 text-center" >
+                    <table class="table table-bordered table-striped table-hover" >
+                        <thead class="thead-dark text-white">
+                            <tr class='tr-planificacion-head text-center'>
+                                <th>Id</th>
+                                <th>Nombre</th>
+                                <th class='text-center d-none d-md-table-cell'>Documento</th>
+                                <th class='text-center d-none d-md-table-cell'>Direccion</th>
+                                <th>Teléfono</th>
+                                <th class='text-center d-none d-md-table-cell'>Email</th>
+                                <th class='text-center d-none d-md-table-cell'>Estado</th>
+                                <th class='text-center d-none d-md-table-cell'>Fecha Creación</th>
+                                <th>Proyectos</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% set i = 1 %}
+                        {% for cliente in clientes %}
+                            <tr class='tr-planificacion-h'>
+                                <td>{{ i }}</td>
+                                <td>{{ cliente.nombre }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.tipoDoc ~ "-" ~ cliente.documento }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.direccion }}</td>
+                                <td>{{ cliente.telefono }}</td>
+                                <td class='text-left d-none d-md-table-cell'>{{ cliente.email }}</td>
+                                <td class='text-center d-none d-md-table-cell'>
+                                    {% if (cliente.estado =="1") %}
+                                        <span class='text-success'>Activo</span>
+                                    {% else %}
+                                         <span class='text-danger'>Inactivo</span>
+                                    {% endif %}                                        
+                                </td>
+                                <td class='text-center d-none d-md-table-cell'>{{ cliente.fechaCreacion ? cliente.fechaCreacion|date('d/m/Y') : '' }}</td>
+                                <td class='text-center'>0</td>
+                                <td class='text-center'>
+                                    <a href="{{ path('app_cliente_show', {'id': cliente.id}) }}" title='Ver detalles del cliente'><i class="fa-solid fa-eye"></i></a>
+                                    <a href="{{ path('app_cliente_edit', {'id': cliente.id}) }}" title='Actualizar datos del cliente'><i class="fa-regular fa-pen-to-square"></i></a>
+                                </td>
+                            </tr>
+                            {% set i = i + 1 %}
+                        {% else %}
+                            <tr>
+                                <td colspan="10" class='text-danger'>No se han definido clientes en el sistema</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
+        </div>
     </div>
     <script>
         $(document).ready(function() {
@@ -102,5 +122,70 @@
                 $(this).addClass('active');
             });
         }); 
+
+        function importarClientes() {
+            $('#miModalUploadClient').modal('show');
+        }
     </script>
+{% endblock %}
+{% block modales %}
+    <!-- cuadro modal  de anuncios -->
+    <div class="modal fade" id="miModal" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Título del Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal()">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Aquí va el contenido de tu modal. Puedes incluir texto, imágenes, formularios, ¡lo que necesites!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- cuadro modal  de importar -->
+    <div class="modal fade" id="miModalUploadClient" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Importar Clientes</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal()">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id='f1' method="post" enctype="multipart/form-data" action="{{ path('app_importar_clientes') }}">
+                        <div class='row'>
+                            <div class='col-12 col-md-12 col-lg-12'>
+                                <div class="form-group">
+                                    <label for="archivo">Selecciona el archivo CSV para importar clientes:</label>
+                                    <input type="file" class="form-control-file" id="archivo" name="archivo" accept=".csv" required>        
+                                </div>
+                            </div>
+                        </div>
+                       <div class='row'>
+                            <div class='col-12 col-md-12 col-lg-12 text-right'>
+                                <button type="submit" class="btn btn-primary">Importar Clientes</button>
+                            </div>
+                        </div>
+                        <div class='row'>
+                            <div class='col-12 col-md-12 col-lg-12 text-left'>
+                                <p class='text-muted text-small'>Ejemplo del archivo .CSV, debe ser separado por ; la primera fila debe contener el nombre de los campos y todos son obligatorios</p>
+                                <pre class='text-muted text-small'>
+nombre;tipo_doc;documento;direccion;telefono;email;estado
+Pedro Perez;V;999999;Direccion de Prueba 1;04245556677;correo1@gmail.com;1
+Maria Lopez;E;5999999;Direccion de Prueba 2;04245556677;correo2@gmail.com;1
+Ente 1;G;324333-4;Direccion de Prueba 3;04245556677;correo3@gmail.com;1
+Empresa 1;J;1234567-8;Direccion de Prueba 4;04245556677;correo4@gmail.com;1                                
+                                </pre>
+                            </div>
+                        </div>                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>    
 {% endblock %}
