@@ -31,16 +31,14 @@
     {% include 'navigation_admin.html.twig' %}
     <!-- Contenido Principal -->
     <div id="content">
-        <div class='row' style="padding-top:50px !important">
-            <div class='col-12 col-md-12 col-lg-12'>
-                <div class="container-fluid p-4">
+        <div class='container-fluid'>
+            <div class='row' style="margin:auto !important; padding-top:50px !important">
+                <div class='col-12 col-md-12 col-lg-12 text-center'>
                     <h2>Usuarios en el Sistema</h2>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-11 col-md-8 col-lg-8 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
-                <div class='text-right'>
+            </div>    
+            <div class="row"  style="margin:auto !important;">
+                <div class="col-12 col-md-12 col-lg-12 text-right">
                     <a href="{{ path('app_user_new') }}" title='Nuevo Usuario'><i class="fa-solid fa-user-plus"></i></a>
                 </div>
                 <table class="table table-bordered table-striped table-hover" style="width: 85% !important;">
@@ -98,7 +96,6 @@
                 </table>
             </div>
         </div>
-
     </div>
     <script>
         $(document).ready(function() {
