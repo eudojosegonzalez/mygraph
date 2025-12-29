@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Materiales{% endblock %}
+{% block title %}Movimiento de Inventario{% endblock %}
 
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
@@ -34,7 +34,7 @@
         <div class='container-fluid'>
             <div class='row' style="margin:auto !important; padding-top:50px !important">
                 <div class='col-12 col-md-12 col-lg-12 text-center'>
-                    <h2>Materiales del Sistema</h2>
+                    <h2>Movimiento de Materiales del Sistema</h2>
                 </div>
             </div>
             <div class="container mt-3">
@@ -50,7 +50,8 @@
             </div>            
             <div class="row"  style="margin:auto !important;">
                 <div class="col-12 col-md-12 col-lg-12 text-right">
-                    <a href="{{ path('app_inventario_new') }}" title='Nuevo Material'><i class="fa-regular fa-square-plus"></i></a>
+                    <a href="{{ path('app_inventario_index') }}" title="Regresar al Listado"><i class="fa-solid fa-list"></i></a>
+                    <a href="{{ path('app_crear_movimento') }}" title='Nuevo Movimiento de Material'><i class="fa-regular fa-square-plus"></i></a>
                 </div>
             </div>
             <div class="row"  style="margin:auto !important;">
@@ -59,77 +60,70 @@
                         <thead class="thead-dark text-white">
                             <tr class='tr-planificacion-head text-center'>
                                 <th>Id</th>
-                                <th class='text-center d-none d-md-table-cell'>Codigo</th>
-                                <th>Nombre</th>
-                                <th class='text-center d-none d-md-table-cell'>Tipo</th>
-                                <th class='text-center d-none d-md-table-cell'>Modelo</th>
-                                <th>Existencia</th>
-                                <th>Nivel Mínimo</th>
-                                <th class='text-center d-none d-md-table-cell'>Costo</th>      
-                                <th class='text-center d-none d-md-table-cell'>Precio de Venta</th>      
-                                <th class='text-center d-none d-md-table-cell'>Estado</th>                                
-                                <th class='text-center d-none d-md-table-cell'>Fecha de actualización</th>
+                                <th>Material</th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th class='text-center d-none d-md-table-cell'>Inicial</th>
+                                <th class='text-center d-none d-md-table-cell'>Final</th>
+                                <th class='text-center d-none d-md-table-cell'>Usuario</th>
+                                <th class='text-center d-none d-md-table-cell'>Proyecto</th>
+                                <th class='text-center d-none d-md-table-cell'>Documento</th>
+                                <th class='text-center d-none d-md-table-cell'>Estado</th>
+                                <th class='text-center d-none d-md-table-cell'>Fecha del Movimiento</th>
+                                <th class='text-center d-none d-md-table-cell'>Observación</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% set i = 1 %}
-                            {% for inventario in inventarios %}
+                            {% for movimiento in movimientos %}
                                 <tr class='tr-planificacion-h'>
-                                    <td class='text-center'>{{ i }}</td>
-                                    <td class='text-left d-none d-md-table-cell'>{{ inventario.codigo }}</td>
-                                    <td>{{ inventario.nombre }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>
-                                        {% if (inventario.tipo == "1") %}
-                                            <span class='text-sucess'>Materiales</span>
+                                    <td class='text-center'>{{ movimiento.id }}</td>
+                                    <td class='text-left'>{{ movimiento.inventario.nombre }}</td>
+                                    <td class='text-center'>
+                                        {% if  (movimiento.tipo == 1) %}
+                                            <span class='text-primary'>Ingreso</span>
                                         {% else %}
-                                            <span class='text-info'>Serivios</span>
+                                            <span class='text-danger'>Egreso</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-right'>{{ movimiento.cantidad }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.inicial }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.final }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.usuario.name }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (movimiento.proyecto == 0) %}
+                                            &nbsp;
+                                        {% else %}
+                                            {{ movimiento.proyecto }}
                                         {% endif %}
                                     </td>
                                     <td class='text-center d-none d-md-table-cell'>
-                                        {{ inventario.modelo }}
-                                    </td>
-                                    <td class='text-right'>
-                                        {% set nivelAdvertencia = (((inventario.critico * 0.5 ) + inventario.critico)) %}
-                                        {% if (inventario.existencia <= inventario.critico) %}
-                                            <span class='text-danger'>
-                                        {% elseif ((inventario.existencia <= nivelAdvertencia)  and (inventario.existencia >= inventario.critico)) %}
-                                            <span class='text-warning'>
+                                        {% if (movimiento.documento != "") %}
+                                            &nbsp;
                                         {% else %}
-                                            <span class='text-success'>
-                                        {% endif %} 
-                                        {{ inventario.existencia }} </span>
-                                        {{ inventario.unidad.simbolo  }}
-                                    </td>
-                                    <td class='text-right d-none d-md-table-cell'>
-                                        {{ inventario.critico }}
-                                    </td>
-                                    <td class='text-right d-none d-md-table-cell'>
-                                        {{ inventario.costo ?  inventario.costo|number_format(2, '.', '') }}
-                                    </td>
-                                    <td class='text-right d-none d-md-table-cell'>
-                                        {{ inventario.precio ?  inventario.precio|number_format(2, '.', '') }}
+                                            {{ movimiento.documento }}
+                                        {% endif %}    
                                     </td>
                                     <td class='text-center d-none d-md-table-cell'>
-                                        {% if (inventario.estado =="1") %}
+                                        {% if (movimiento.estado =="1") %}
                                             <span class='text-success'>Activo</span>
                                         {% else %}
                                             <span class='text-danger'>Inactivo</span>
-                                        {% endif %}                                         
+                                        {% endif %}                                              
+
                                     </td>
-                                    <td class='text-center d-none d-md-table-cell'>
-                                        {{ inventario.fechaAct ? inventario.fechaAct|date('d/m/Y') : '' }}
-                                    </td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.fechaAct ? movimiento.fechaAct|date('d/m/Y H:i') : '' }}</td>
+                                    <td class='text-left d-none d-md-table-cell'>{{ movimiento.observacion }}</td>
                                     <td class='text-center'>
-                                        <a href="{{ path('app_inventario_show', {'id': inventario.id}) }}" title='Ver detalles del Material'><i class="fa-solid fa-eye"></i></a>
-                                        <a href="{{ path('app_inventario_edit', {'id': inventario.id}) }}" title='Editar detalles del Material'><i class="fa-regular fa-pen-to-square"></i></a>
-                                        <a href="{{ path('app_show_movimiento_materiales', {'id': inventario.id}) }}" title='Movimientos de Material'><i class="fa-regular fa-clock"></i></a>
+                                        <a href="{{ path('app_movimiento_show', {'id': movimiento.id}) }}"><i class="fa-solid fa-eye"></i></a>
+                                        <a href="{{ path('app_editar_movimento', {'id': movimiento.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
                                     </td>
                                 </tr>
                                 {% set i = i + 1 %}
                             {% else %}
                                 <tr>
-                                    <td colspan="8" class='text-danger'>No se han encontrado materiales en el sistema</td>
+                                    <td colspan="11" class='text-danger'>No se han encontrado movimiento de materiales en el sistema</td>
                                 </tr>
                             {% endfor %}
                         </tbody>                     

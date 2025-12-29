@@ -41,60 +41,17 @@
                         <h2>Movimiento de Inventario</h2>
                     </div>
                     <div class='card-body'>
-                        <div class='form-group'>
-                            <label for='tipo'>Tipo de operación</label>
-                            {% if movimiento.tipo == 1 %}
-                                {% set tipoV ="Ingreso" %}
-                            {% else %}
-                                {% set tipoV ="Egreso" %}
-                            {% endif %}
-                            <input type='text' class='form-control' id='idMaterial'  value='{{ tipoV }}' disabled>
-                        </div>
-                        <div class='form-group'>
-                            <label for='idMaterial'>Material</label>
-                            <input type='text' class='form-control' id='idMaterial'  value='{{ movimiento.inventario.nombre }}' disabled>                           
-                        </div>                          
-                        <div class='form-group'>
-                            <label for='cantidad'>Cantidad de Material</label>
-                            <input type='text' id='cantidad' class='form-control' type="number" id='cantidad' name='cantidad' step="0.01" min="0" placeholder="0.00" title='Cantidad de material a anexar o retirar del inventario' style='text-align:right !important'  disabled value='{{movimiento.cantidad}}'>
-                        </div>     
-                        <div class='form-group'>
-                            <label for='idProyecto'>Proyecto involucrado</label>
-                            <input id='idProyecto' class='form-control' type="text" title='Proyecto en el cual se involucró el material' disabled value='{{ movimiento.proyecto }}'>
-                        </div>
-                        <div class='form-group'>
-                            <label for='documento'>Documento</label>
-                            <input id='documento' class='form-control' type="text" title='Factura o documento que representa la adquisición del material' disabled value='{{ movimiento.documento }}'>
-                        </div>       
-                                                                                       
-                        <div class='form-group'>
-                            <label for='unidad'>Unidad involucrada</label>
-                            <input id='unidad' type='text' class='form-control' value='{{ movimiento.unidad.simbolo }}' disabled>
-                        </div>
-                        <div class='form-group'>
-                            <label for='usuario'>Usuario</label>
-                            <input id='usuario' type='text' class='form-control' value='{{ movimiento.usuario.name }}' disabled>
-                        </div>      
-                        <div class='form-group'>
-                            <label for='fecha'>Fecha</label>
-                            <input id='fecha' type='text' class='form-control' value="{{ movimiento.fechaAct ? movimiento.fechaAct|date('d/m/Y H:i') : ''  }}" disabled>
-                        </div>     
-                        <div class='form-group'>
-                            <label for='estado'>Estado</label>
-                            {% if (movimiento.estado == 1) %}
-                                {% set estadoV="Activo" %}
-                            {% else %}
-                                {% set estadoV="Inactivo" %}
-                            {% endif %}
-                            <input id='estado' type='text' class='form-control' value="{{ estadoV }}" disabled>
-                        </div>                                                                   
-                        <div class='form-group'>
-                            <label for='observacion'>Observacion</label>
-                            <textarea class='form-control' id='observacion' name='observacion' disabled>{{ movimiento.observacion }}</textarea>
-                        </div>   
-                        <div class="text-right">
-                            <a href="{{ path('app_movimiento_edit', {'id': movimiento.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
-                        </div>                                             
+                            <div class="container mt-3">
+                            {# 'app.flashes' devuelve un array de arrays #}
+                            {% for label, messages in app.flashes %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                                        <span class='text-danger'>{{ message }}</span>
+                                        
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div> 
                     </div>
                 </div>
             </div>
