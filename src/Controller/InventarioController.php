@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Inventario;
 use App\Form\InventarioType;
 use App\Repository\InventarioRepository;
+use App\Repository\MovimientoRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -23,6 +24,8 @@ use Doctrine\DBAL\Connection; // ¡Importante!
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Exception;
+
 
 #[IsGranted("ROLE_ADMIN")]
 #[Route('/inventario')]
@@ -120,4 +123,48 @@ final class InventarioController extends AbstractController
 
         return $this->redirectToRoute('app_inventario_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
+    /* esta funcion permite mostrar los movimientos de los materiales */
+    #[Route('/{id}/show_movimiento_materiales', name: 'app_show_movimiento_materiales', methods: ['GET'])]
+    public function showMovimientoMateriales(
+        ?Inventario $inventario,
+        MovimientoRepository $movimientoRepository
+        ): Response
+    {
+        try {
+            $fontSize= $this->getParameter('fontSize');
+            $iconsWidthSize=$this->getParameter('iconsWidthSize');
+            $iconsHeightSize=$this->getParameter('iconsHeightSize');
+            $sizeSeparador=$this->getParameter('sizeSeparador');
+            $colorSeparator=$this->getParameter('colorSeparator');
+            $appLogo=$this->getParameter('logo');     
+            
+            $idInventario=$inventario->getId();
+
+            // buscamos los movimientos del inventario
+            $movimientos=$movimientoRepository->findBy(['inventario'=>$idInventario],['fecha_act' => 'DESC']);
+
+            if ($movimientos){
+                return $this->render('inventario/show_movimientos_materiales.html.twig', [
+                    'inventario' => $inventario,
+                    'logo'=>$appLogo,
+                    'movimientos'=>$movimientos
+                ]);
+            } else {
+                $this->addFlash('error', 'No se han encontrado movimientos para este Material');
+                return $this->render('inventario/not_found_moves.html.twig', [
+                    'logo'=>$appLogo
+                ]);            
+            }  
+        } catch (Exception $e) {
+            // Manejo del error
+            $this->addFlash('error', 'Ocurrió unn error que no pudo ser controlado '.$e->getMessage());
+            return $this->render('inventario/not_found_moves.html.twig', [
+                'logo'=>$appLogo
+            ]); 
+        }
+   
+
+    }    
 }

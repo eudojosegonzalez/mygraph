@@ -30,6 +30,8 @@ use Doctrine\DBAL\Connection; // ¡Importante!
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Exception;
+
 
 use DateTime;
 use DateTimeInterface;
@@ -312,5 +314,181 @@ final class MovimientoController extends AbstractController
 
 
     }   
-  
+
+    /*
+    Esta funcion  permite cargar un movimiento de inventario para la actualización
+    solo es posible actuaizar el estado y la observacion
+    los demas datos no serán modificados
+    */
+    #[Route('/{id}/editar_movimiento', name: 'app_editar_movimento', methods: ['GET'])]
+    public function editarMovimiento(
+        Request $request, 
+        InventarioRepository $inventarioRepository,
+        UnidadRepository $unidadRepository,
+        ProyectoRepository $proyectoRepository,
+        MovimientoRepository $movimientoRepository,
+        ?Movimiento $movimiento,
+        EntityManagerInterface $entityManager): Response
+    {
+
+        try{
+            $fontSize= $this->getParameter('fontSize');
+            $iconsWidthSize=$this->getParameter('iconsWidthSize');
+            $iconsHeightSize=$this->getParameter('iconsHeightSize');
+            $sizeSeparador=$this->getParameter('sizeSeparador');
+            $colorSeparator=$this->getParameter('colorSeparator');
+            $appLogo=$this->getParameter('logo');              
+            
+            // buscamos los materiales 
+            $materiales=$inventarioRepository->findBy(['estado'=>1]);
+
+            // buscamos las unidades
+            $unidades=$unidadRepository->findBy(['estado'=>1]);
+
+            // buscamos los proyectos activos
+            $proyectos=$proyectoRepository->findBy(['estado'=>1]);
+
+            /*$idMovimiento=intval($request->query->get('id'));
+
+            $movimiento=$movimientoRepository->find($idMovimiento);*/
+
+            if ($movimiento){ 
+                return $this->render('movimiento/edit2.html.twig', [
+                    'logo'=>$appLogo,
+                    'materiales'=>$materiales,
+                    'unidades'=>$unidades,
+                    'proyectos'=>$proyectos,
+                    'movimiento'=>$movimiento
+                ]);
+            } else {
+                $this->addFlash('error', 'Este movimiento no existe ');
+                return $this->render('movimiento/not_found.html.twig', [
+                    'logo'=>$appLogo
+                ]);                
+            }
+        } catch (Exception $e) {
+            $this->addFlash('error', 'Ocurrio un error que no pudo ser controlado '.$e->getMessage());
+            return $this->render('movimiento/not_found.html.twig', [
+                'logo'=>$appLogo,
+                'movimiento'=>null
+            ]);
+        }
+    }    
+
+
+   /*
+    Esta ruta permite grabar los movimientos de materia prima
+    si es para aumentar se guarda una referencia que representa una factura o nota de entrega de materiales
+    si es para disminuir se asume que idproyecto es el proyecto donde se va a utilizar el material
+    */    
+    #[Route('/actualizar_movimiento/', name: 'app_actualizar_movimento', methods: ['POST'])]
+    public function updateMovimiento(
+        Request $request, 
+        InventarioRepository $inventarioRepository,
+        ProyectoRepository $proyectoRepository,
+        MovimientoRepository $movimientoRepository,
+        ManagerRegistry $doctrine): Response
+    {
+
+        $user=$this->getuser();
+        $params = $request->request->all();
+
+        /*
+        tipo:tipoV,
+        cantidad:catidadV,
+        idProyecto:idProyectoV,
+        documento:dicumentoV,
+        idMaterial:idMaterialV
+        */
+
+        $id=intval($params['idMovimiento']);
+        $estado=intval($params['estado']);
+        $observacion=($params['observacion']);
+
+
+        try {
+            // buscamos el movimiento
+            $movimiento=$movimientoRepository->find($id);
+
+            if ($movimiento){
+                $fecha=new DateTime();
+                // movimiento encontrado
+                // determinamos el monto
+                $cantidad=$movimiento->getCantidad();
+                // determinamos el tipo
+                $tipo=$movimiento->getTipo();
+                // determinamos el material
+                $inventario=$movimiento->getInventario();
+                // determinamos el estado del movimiento
+                $estadoMovimiento=$movimiento->getEstado();
+
+                // determinamos la cantidad inicial
+                $inicial=$inventario->getExistencia();
+
+                // reversamos en el material al cantidad segun sea el tipo
+                // si es de adicion restamos
+                // si es de resta adicionamos
+
+                if ($estado!=$estadoMovimiento) {
+                    if ($estadoMovimiento == 1){
+                        //esta activo
+                        if ($tipo==1){
+                            // es un ingreso restamos
+                            $final=$inicial-$cantidad;
+                        } else {
+                            // es un egreso sumamos
+                            $final=$inicial+$cantidad;
+                        }                        
+                    } else {
+                        // esta inactivo y lo vamos a activar
+                        if ($tipo==1){
+                            // es un ingreso restamos
+                            $final=$inicial+$cantidad;
+                        } else {
+                            // es un egreso
+                            $final=$inicial-$cantidad;
+                        }
+                    }
+                    // verificamos que el resultado sea valido
+                    if ($final >=0){
+                        // actualizamos el inventario del material
+                        $inventario->setExistencia($final);
+                        $inventario->setFechaAct($fecha);
+
+                        $entityManager = $doctrine->getManager();
+                        $entityManager->persist($inventario);
+                        $entityManager->flush();  
+
+                        // actualizamos el estado del movimiento     
+                        $movimiento->setEstado($estado);
+                        $movimiento->setFechaAct($fecha);
+                        $movimiento->setUsuario($user);
+                        $movimiento->setObservacion($observacion);
+
+                        $entityManager = $doctrine->getManager();
+                        $entityManager->persist($movimiento);
+                        $entityManager->flush();                          
+                        
+                        $respuesta= ['valor'=>"1",'mensaje'=>'Movimiento actualizado con éxito'];
+                    } else {
+                        $respuesta= ['valor'=>"-1",'mensaje'=>'No posee material suficiente en inventario para registrar el movimiento'];
+                    }   
+                } else {
+                    $respuesta= ['valor'=>"-2",'mensaje'=>'No se está cambiando el estado del movimiento, operación no valida'];
+                }
+
+            } else {
+                $respuesta= ['valor'=>"-2",'mensaje'=>'Este movimiento no existe'];
+            }
+
+            return new JsonResponse ($respuesta) ;
+        } catch (\Exception $e) {
+            // Manejo del error
+            $respuesta= ['valor'=>"-3",'mensaje'=>"Ocurrió un error que no pudo ser controlado ".$e->getMessage()];
+            return new JsonResponse ($respuesta) ;
+        }
+
+
+    }       
+ 
 }
