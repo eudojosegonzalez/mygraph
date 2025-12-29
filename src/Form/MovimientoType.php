@@ -43,7 +43,7 @@ class MovimientoType extends AbstractType
                 NumberType::class, 
                 ['required' => true, 
                 'label' => 'Cantidad de Material',
-                'attr' => ['placeholder' => 'Cantidad de material a anexar o restar del inventario']
+                'attr' => ['placeholder' => 'Cantidad de material a anexar o restar del inventario','style' => 'text-align: right;']
                 ])
             ->add('proyecto', 
                 NumberType::class, 
@@ -64,6 +64,8 @@ class MovimientoType extends AbstractType
             ->add('unidad', EntityType::class, [
                 'class' => Unidad::class,
                 'choice_label' => 'nombre',
+                'attr' => ['placeholder' => 'Número de factura o remisión'],
+                'disabled' => true
             ])
             ->add('usuario', EntityType::class, [
                 'class' => User::class,

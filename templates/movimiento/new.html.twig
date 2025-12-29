@@ -44,6 +44,36 @@
                         </div>
                     </div>
                     <div class='card-body'>
+                        <div class='form-group'>
+                            <label for='tipo'>Tipo de operación</label>
+                            <select class='form-control' id='tipo' name='tipo' required>
+                                <option value='1'>Anexar a la existencia</option>
+                                <option value='2'>Rebajar a la existencia</option>
+                            </select>
+                        </div>
+                        <div class='form-group'>
+                            <label for='cantidad'>Cantidad de Material</label>
+                            <input class='form-control' type="number" id='cantidad' name='cantidad' step="0.01" min="0" placeholder="0.00" title='Cantidad de material a anexar o retirar del inventario' style='text-align:right !important'>
+                        </div>     
+                        <div class='form-group'>
+                            <label for='idProyecto'>Proyecto involucrado</label>
+                            <input class='form-control' type="text" id='idProyecto' name='idProyecto'  title='Proyecto en el cual se involucró el material'>
+                        </div>   
+                        <div class='form-group'>
+                            <label for='documento'>Documento</label>
+                            <input class='form-control' type="text" id='documento' name='documento'  title='Factura o documento que representa la adquisición del material'>
+                        </div>       
+                        <div class='form-group'>
+                            <label for='idMaterial'>Material</label>
+                            <select class='form-control' id='idMaterial' name='idMaterial' required>
+                                {% for material in materiales %}     
+                                    <option value='{{ material.id }}'>{{ material.nombre }}</option>                             
+                                {% else %}
+                                    <option value='-99'>No hay materiales activos en la Base de Datos</option>
+                                {% endfor %}
+                            </select>                            
+                        </div>                                                                                         
+
                         {{ include('movimiento/_form.html.twig') }}
                         <div class='text-right btn-sm'>
                             <button class='btn btn-info' onclick='javascript:verProyectos()'>Ver Proyectos</button>

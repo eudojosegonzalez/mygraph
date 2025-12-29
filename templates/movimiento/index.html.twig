@@ -50,7 +50,7 @@
             </div>            
             <div class="row"  style="margin:auto !important;">
                 <div class="col-12 col-md-12 col-lg-12 text-right">
-                    <a href="{{ path('app_movimiento_new') }}" title='Nuevo Movimiento de Material'><i class="fa-regular fa-square-plus"></i></a>
+                    <a href="{{ path('app_crear_movimento') }}" title='Nuevo Movimiento de Material'><i class="fa-regular fa-square-plus"></i></a>
                 </div>
             </div>
             <div class="row"  style="margin:auto !important;">
@@ -59,6 +59,7 @@
                         <thead class="thead-dark text-white">
                             <tr class='tr-planificacion-head text-center'>
                                 <th>Id</th>
+                                <th>Material</th>
                                 <th>Tipo</th>
                                 <th>Cantidad</th>
                                 <th class='text-center d-none d-md-table-cell'>Inicial</th>
@@ -67,7 +68,8 @@
                                 <th class='text-center d-none d-md-table-cell'>Proyecto</th>
                                 <th class='text-center d-none d-md-table-cell'>Documento</th>
                                 <th class='text-center d-none d-md-table-cell'>Estado</th>
-                                <th lass='text-center d-none d-md-table-cell'>Fecha del Movimiento</th>
+                                <th class='text-center d-none d-md-table-cell'>Fecha del Movimiento</th>
+                                <th class='text-center d-none d-md-table-cell'>Observación</th>
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -75,14 +77,33 @@
                             {% set i = 1 %}
                             {% for movimiento in movimientos %}
                                 <tr class='tr-planificacion-h'>
-                                    <td>{{ movimiento.id }}</td>
-                                    <td>{{ movimiento.tipo }}</td>
-                                    <td>{{ movimiento.cantidad }}</td>
+                                    <td class='text-center'>{{ movimiento.id }}</td>
+                                    <td class='text-left'>{{ movimiento.inventario.nombre }}</td>
+                                    <td class='text-center'>
+                                        {% if  (movimiento.tipo == 1) %}
+                                            <span class='text-primary'>Ingreso</span>
+                                        {% else %}
+                                            <span class='text-danger'>Egreso</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-right'>{{ movimiento.cantidad }}</td>
                                     <td class='text-center d-none d-md-table-cell'>{{ movimiento.inicial }}</td>
                                     <td class='text-center d-none d-md-table-cell'>{{ movimiento.final }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.proyecto }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.user.nombre }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.documento }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.usuario.name }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (movimiento.proyecto == 0) %}
+                                            &nbsp;
+                                        {% else %}
+                                            {{ movimiento.proyecto }}
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (movimiento.documento != "") %}
+                                            &nbsp;
+                                        {% else %}
+                                            {{ movimiento.documento }}
+                                        {% endif %}    
+                                    </td>
                                     <td class='text-center d-none d-md-table-cell'>
                                         {% if (movimiento.estado =="1") %}
                                             <span class='text-success'>Activo</span>
@@ -91,8 +112,9 @@
                                         {% endif %}                                              
 
                                     </td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.fechaAct ? movimiento.fechaAct|date('Y-m-d H:i:s') : '' }}</td>
-                                    <td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ movimiento.fechaAct ? movimiento.fechaAct|date('d/m/Y H:i') : '' }}</td>
+                                    <td class='text-left d-none d-md-table-cell'>{{ movimiento.observacion }}</td>
+                                    <td class='text-center'>
                                         <a href="{{ path('app_movimiento_show', {'id': movimiento.id}) }}"><i class="fa-solid fa-eye"></i></a>
                                         <a href="{{ path('app_movimiento_edit', {'id': movimiento.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
                                     </td>
