@@ -61,8 +61,12 @@
                                 <th>Id</th>
                                 <th class='text-center d-none d-md-table-cell'>Codigo</th>
                                 <th>Nombre</th>
+                                <th class='text-center d-none d-md-table-cell'>Tipo</th>
                                 <th class='text-center d-none d-md-table-cell'>Modelo</th>
                                 <th>Existencia</th>
+                                <th>Nivel Mínimo</th>
+                                <th class='text-center d-none d-md-table-cell'>Costo</th>      
+                                <th class='text-center d-none d-md-table-cell'>Precio de Venta</th>      
                                 <th class='text-center d-none d-md-table-cell'>Estado</th>                                
                                 <th class='text-center d-none d-md-table-cell'>Fecha de actualización</th>
                                 <th>Acciones</th>
@@ -73,10 +77,39 @@
                             {% for inventario in inventarios %}
                                 <tr class='tr-planificacion-h'>
                                     <td class='text-center'>{{ i }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ inventario.codigo }}</td>
+                                    <td class='text-left d-none d-md-table-cell'>{{ inventario.codigo }}</td>
                                     <td>{{ inventario.nombre }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ inventario.modelo }}</td>
-                                    <td class='text-right'>{{ inventario.existencia }} {{ inventario.unidad.simbolo  }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (inventario.tipo == "1") %}
+                                            <span class='text-sucess'>Materiales</span>
+                                        {% else %}
+                                            <span class='text-info'>Serivios</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {{ inventario.modelo }}
+                                    </td>
+                                    <td class='text-right'>
+                                        {% set nivelAdvertencia = (((inventario.critico * 0.5 ) + inventario.critico)) %}
+                                        {% if (inventario.existencia <= inventario.critico) %}
+                                            <span class='text-danger'>
+                                        {% elseif ((inventario.existencia <= nivelAdvertencia)  and (inventario.existencia >= inventario.critico)) %}
+                                            <span class='text-warning'>
+                                        {% else %}
+                                            <span class='text-success'>
+                                        {% endif %} 
+                                        {{ inventario.existencia }} </span>
+                                        {{ inventario.unidad.simbolo  }}
+                                    </td>
+                                    <td class='text-right d-none d-md-table-cell'>
+                                        {{ inventario.critico }}
+                                    </td>
+                                    <td class='text-right d-none d-md-table-cell'>
+                                        {{ inventario.costo ?  inventario.costo|number_format(2, '.', '') }}
+                                    </td>
+                                    <td class='text-right d-none d-md-table-cell'>
+                                        {{ inventario.precio ?  inventario.precio|number_format(2, '.', '') }}
+                                    </td>
                                     <td class='text-center d-none d-md-table-cell'>
                                         {% if (inventario.estado =="1") %}
                                             <span class='text-success'>Activo</span>
@@ -84,12 +117,13 @@
                                             <span class='text-danger'>Inactivo</span>
                                         {% endif %}                                         
                                     </td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ inventario.fechaAct ? inventario.fechaAct|date('d/m/Y') : '' }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {{ inventario.fechaAct ? inventario.fechaAct|date('d/m/Y') : '' }}
+                                    </td>
                                     <td class='text-center'>
                                         <a href="{{ path('app_inventario_show', {'id': inventario.id}) }}" title='Ver detalles del Material'><i class="fa-solid fa-eye"></i></a>
                                         <a href="{{ path('app_inventario_edit', {'id': inventario.id}) }}" title='Editar detalles del Material'><i class="fa-regular fa-pen-to-square"></i></a>
                                         <a href="{{ path('app_inventario_edit', {'id': inventario.id}) }}" title='Movimientos de Material'><i class="fa-regular fa-clock"></i></a>
-                                        
                                     </td>
                                 </tr>
                                 {% set i = i + 1 %}

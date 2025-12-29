@@ -1,0 +1,346 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Movimeinto de Inventario{% endblock %}
+
+{% block body %}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user-circle mr-1"></i> Perfil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog mr-1"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt mr-1"></i> Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <!-- Sidebar -->
+    {% include 'navigation_admin.html.twig' %}
+    <!-- Contenido Principal -->
+    <div id="content">
+        <div class="row" style="padding-top:50px !important">
+            <div class="col-11 col-md-5 col-lg-5 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
+                <div class='text-right'>
+                    <a href="{{ path('app_movimiento_index') }}" title="Regresar al Listado"><i class="fa-solid fa-list"></i></a>
+                </div>
+                <div class='card'>
+                    <div class='card-header'>
+                        <h2>Movimeinto de Inventario</h2>
+                    </div>
+                    <div class='card-body'>
+                        <div class='form-group'>
+                            <label for='tipo'>Tipo de operación</label>
+                            <select class='form-control' id='tipo' name='tipo' required>
+                                <option value='1'>Anexar a la existencia</option>
+                                <option value='2'>Rebajar a la existencia</option>
+                            </select>
+                        </div>
+                        <div class='form-group'>
+                            <label for='cantidad'>Cantidad de Material</label>
+                            <input class='form-control' type="number" id='cantidad' name='cantidad' step="0.01" min="0" placeholder="0.00" title='Cantidad de material a anexar o retirar del inventario' style='text-align:right !important'>
+                        </div>     
+                        <div class='form-group'>
+                            <label for='idProyecto'>Proyecto involucrado</label>
+                            <div class="input-group">
+                                <input class='form-control' type="text" id='idProyecto' name='idProyecto' title='Proyecto en el cual se involucró el material'>
+                                <div class="input-group-append">
+                                    <button id='b1' name='b1' class='btn btn-primary' onclick="javascript:searchProyect()">Buscar Proyectos</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class='form-group'>
+                            <label for='documento'>Documento</label>
+                            <input class='form-control' type="text" id='documento' name='documento'  title='Factura o documento que representa la adquisición del material'>
+                        </div>       
+                        <div class='form-group'>
+                            <label for='idMaterial'>Material</label>
+                            <select class='form-control' id='idMaterial' name='idMaterial' required onchange="javascript:changeMaterial()">
+                                {% for material in materiales %}     
+                                    <option value='{{ material.id }}'>{{ material.nombre }}</option>                             
+                                {% else %}
+                                    <option value='-99'>No hay materiales activos en la Base de Datos</option>
+                                {% endfor %}
+                            </select>                            
+                        </div>                                                                                         
+                        <div class='form-group'>
+                            <label for='tipo'>Unidad involucrada</label>
+                            <select class='form-control' id='tipo' name='tipo' disabled>
+                                {% for unidad in unidades %}     
+                                    <option value='{{ unidad.id }}'>{{ unidad.nombre }}</option>                             
+                                {% else %}
+                                    <option value='-99'>No hay unidades en el sistema</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class='form-group'>
+                            <label for='observacion'>Observacion</label>
+                            <textarea class='form-control' id='observacion' name='observacion'></textarea>
+                        </div>                        
+                        <div class='text-right btn-sm'>
+                            <button class='btn btn-primary' onclick='javascript:saveMovimiento()'>Guardar Movimiento</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
+
+        function searchProyect(){
+            $('#miModalProyectos').modal('show');
+        }
+
+        function changeMaterial(){
+            alert ("Cambiando material")
+        }
+
+        function changeProyect(){
+            var idProyectoV=document.getElementById('selectProyectos').value;
+            if (idProyectoV!="-99"){
+                alert("Cambio de proyectos");
+            } else {
+                alert("No hay proyectos en el sistema");
+            }
+        }
+
+        function saveMovimiento(){
+            try {
+                document.getElementById('tipo').style.backgroundColor='#FFFFFF';
+                document.getElementById('cantidad').style.backgroundColor='#FFFFFF';
+                document.getElementById('idProyecto').style.backgroundColor='#FFFFFF';
+                document.getElementById('documento').style.backgroundColor='#FFFFFF';
+                document.getElementById('idMaterial').style.backgroundColor='#FFFFFF';
+                document.getElementById('observacion').style.backgroundColor='#FFFFFF';
+                paso=1;
+                var tipoV=document.getElementById('tipo').value;
+                paso=2;
+                var cantidadV=document.getElementById('cantidad').value;
+                paso=3;
+                var idProyectoV=document.getElementById('idProyecto').value;
+                paso=4;
+                var documentoV=document.getElementById('documento').value;
+                paso=5;
+                var idMaterialV=document.getElementById('idMaterial').value;
+                paso=6;
+                var observacionV=document.getElementById('observacion').value;
+
+                // validamos los campos
+                paso=7;
+                if (isNaN(cantidadV)) {
+                    paso=8;
+                    cadena="El campo Cantidad Debe ser Númerico";
+                    paso=9;
+                    msgError(cadena);
+                    paso=10;
+                    return (false);
+                } else {
+                    paso=11;
+                    if (parseFloat(cantidadV)==0.00){
+                        paso=12;
+                        cadena="No puede guardar movimientos cuyo CANTIDAD sea CERO";
+                        paso=13;
+                        msgError(cadena);
+                        paso=14;
+                        return (false);
+                    }
+                }
+                
+                paso=15;
+                console.log ((cantidadV));
+                paso=17;
+
+                if (cantidadV === null || cantidadV.toString().trim() === "") {
+                    // 1. Verificar si está vacío o solo contiene espacios
+                    paso=19;
+                    document.getElementById('cantidad').style.backgroundColor='#ffe5b4';
+                    cadena="No puede crear movimientos de materiales con una CANTIDAD igual a Cero";
+                    paso=20;
+                    msgError(cadena);
+                    paso=21;
+                    return (false);
+                } else if (isNaN(Number(cantidadV))) {
+                    // 2. Verificar si NO es un número
+                    // Usamos Number() para asegurar que incluso strings numéricos se validen bien                    
+                    paso=22;
+                    document.getElementById('cantidad').style.backgroundColor='#ffe5b4';
+                    cadena="No puede crear movimientos de materiales con una CANTIDAD que no es Numeérico";
+                    paso=23;
+                    msgError(cadena);
+                    paso=24;
+                    return (false);                    
+                }
+
+
+                // verificamos si el proyecto es valido
+                paso=50;
+                if (idProyectoV !==""){
+                    paso=51;
+                    // verificamos i es un numero
+                    if (isNaN(idProyectoV)) {
+                        paso=52;
+                        cadena="El ID del Proyecto es un campo numérico, presione el boton <button class='btn-primary' disabled>Buscar Proyectos</button> para poder seleccionar el proyecto que le interesa";
+                        document.getElementById('idProyecto').style.backgroundColor='#ffe5b4';
+                        paso=53;
+                        msgError(cadena);
+                        paso=54;
+                        return (false);                         
+                    }              
+                }
+
+
+                paso=80;
+                $.ajax({
+                    url: "{{ path('app_salvar_movimento') }}",
+                    type: "post",
+                    dataType: "html",
+                    data : {
+                        tipo:tipoV,
+                        cantidad:cantidadV,
+                        idProyecto:idProyectoV,
+                        documento:documentoV,
+                        idMaterial:idMaterialV,
+                        observacion:observacionV
+
+                    }
+                }).done(function (res) {
+                    paso=81;
+                    //console.log (res);
+                    var data = JSON.parse(res); 
+                    paso=82;               
+                    console.log  (data);  
+                    paso=83;                                    
+                    if (data.valor=="1"){
+                        paso=84;
+                        cadena="Se insertó el movimiento en la BD";
+                        paso=85;
+                        msgInfo(cadena);
+                        paso=86;
+                        setTimeout(function() {
+                            window.location="{{ path('app_movimiento_index') }}";
+                        }, 5000);                    
+                    } else if (data.valor=="-1") {
+                        paso=87;
+                        cadena="No se pudo guardar los datros del movimiento";
+                        paso=88;
+                        msgError(cadena);
+                    } else {
+                        paso=89;
+                        cadena="Ocurrió un error que no pudo ser controlado<br>Inténtelo de nuevo";
+                        paso(90);
+                        msgError(cadena);
+                    }
+                });   
+            } catch (error) {
+                // Código que se ejecuta si hay un error en el bloque try
+                console.error("¡Ha ocurrido un error en el procedimiento saveMovimiento");
+                console.error("Mensaje de error:", error.message,"paso:",paso);
+                console.error("Tipo de error:", error.name);
+            }  
+        }
+
+        function cierraModal(){
+            $('#miModal').modal('hide');
+        }
+
+        function cierraModal2(){
+            $('#miModalProyectos').modal('hide');
+        }     
+        
+        function msgError (cadena){
+            var cadena="<span class='text-danger'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');    
+        }
+
+        function msgWarning (cadena){
+            var cadena="<span class='text-warning'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');     
+        }
+
+        function msgInfo (cadena){
+            var cadena="<span class='text-info'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');     
+        }        
+    </script>
+{% endblock %}
+{% block modales %}
+    <!-- cuadro modal  de anuncios -->
+    <div class="modal fade" id="miModal" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Título del Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal()">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Aquí va el contenido de tu modal. Puedes incluir texto, imágenes, formularios, ¡lo que necesites!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="miModalProyectos" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Proyectos en el sistema</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal2()">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class='form-group'>
+                        <label for='selectProyectos'>Proyectos en el Sistema</label>
+                        <select class='form-control ' id='selectProyectos' name='selectProyectos' style='width:85% !important'>
+                            {% for proyecto in proyectos %}
+                                <option vlaue='{{ proyecto.id }}'>{{ proyectoi.nombre | trim }}</option>
+                            {% else %}
+                                <option value='-99' style='color:#ff0000 !important'>No hay proyectos definidos en el sistema</option>
+                            {% endfor %}   
+                        </select>
+                    </div>
+                    <div class='text-right'>
+                        <button class='btn btn-primary' onclick="javascript:changeProyect()">Seleccionar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
+{% endblock %}

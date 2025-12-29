@@ -50,6 +50,9 @@ class Movimiento
     #[ORM\Column]
     private ?\DateTime $fecha_act = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $observacion = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -183,6 +186,18 @@ class Movimiento
     public function setFechaAct(\DateTime $fecha_act): static
     {
         $this->fecha_act = $fecha_act;
+
+        return $this;
+    }
+
+    public function getObservacion(): ?string
+    {
+        return $this->observacion;
+    }
+
+    public function setObservacion(?string $observacion): static
+    {
+        $this->observacion = $observacion;
 
         return $this;
     }

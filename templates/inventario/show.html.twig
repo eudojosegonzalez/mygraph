@@ -57,11 +57,11 @@
                                 </tr>
                                 <tr>
                                     <th>Modelo</th>
-                                    <td>{{ inventario.modelo }}</td>
+                                    <td >{{ inventario.modelo }}</td>
                                 </tr>
                                 <tr>
                                     <th>Estado</th>
-                                    <td>
+                                    <td class='text-center'>
                                         {% if (inventario.estado =="1") %}
                                             <span class='text-success'>Activo</span>
                                         {% else %}
@@ -71,12 +71,46 @@
                                 </tr>
                                 <tr>
                                     <th>Existencia</th>
-                                    <td>{{ inventario.existencia }} {{ inventario.unidad.simbolo }}</td>
+                                    <td class='text-right'>
+                                        {% set nivelAdvertencia = (((inventario.critico * 0.5 ) + inventario.critico)) %}
+                                        {% if (inventario.existencia <= inventario.critico) %}
+                                            <span class='text-danger'>
+                                        {% elseif ((inventario.existencia <= nivelAdvertencia)  and (inventario.existencia >= inventario.critico)) %}
+                                            <span class='text-warning'>
+                                        {% else %}
+                                            <span class='text-success'>
+                                        {% endif %} 
+                                        {{ inventario.existencia }} </span>
+                                        {{ inventario.unidad.simbolo  }}
+                                    </td>
                                 </tr>
+                              <tr>
+                                    <th>Nivel Mínimo de Existencia</th>
+                                    <td class='text-right'>{{ inventario.critico }} {{ inventario.unidad.simbolo }}</td>
+                                </tr>                                
                                 <tr>
                                     <th>Fecha de Actualización</th>
-                                    <td>{{ inventario.fechaAct ? inventario.fechaAct|date('d/m/Y') : '' }}</td>
+                                    <td class='text-center'>{{ inventario.fechaAct ? inventario.fechaAct|date('d/m/Y') : '' }}</td>
                                 </tr>
+                                <tr>
+                                    <th>Costo</th>
+                                    <td class='text-right'>{{ inventario.costo ? inventario.costo|number_format(2, '.', '') : 0.00 }}</td>
+                                </tr>   
+                               <tr>
+                                    <th>Precio Venta</th>
+                                    <td class='text-right'>{{ inventario.precio ? inventario.precio|number_format(2, '.', '') : 0.00 }}</td>
+                                </tr> 
+                               <tr>
+                                    <th>Tipo</th>
+                                    <td class='text-center'>
+                                        {% if (inventario.tipo =="1") %}
+                                            <span class='text-success'>Materiales</span>
+                                        {% else %}
+                                            <span class='text-info'>Servicio</span>
+                                        {% endif %}                                            
+
+                                    </td>
+                                </tr>                                                                                               
                             </tbody>
                         </table>
 

@@ -3,8 +3,15 @@
 namespace App\Controller;
 
 use App\Entity\Movimiento;
+use App\Entity\Inventario;
+use App\Entity\Unidad;
+use App\Entity\Proyecto;
 use App\Form\MovimientoType;
 use App\Repository\MovimientoRepository;
+use App\Repository\InventarioRepository;
+use App\Repository\UnidadRepository;
+use App\Repository\ProyectoRepository;
+
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,6 +31,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 
+use DateTime;
+use DateTimeInterface;
+
 #[IsGranted("ROLE_ADMIN")]
 #[Route('/movimiento')]
 final class MovimientoController extends AbstractController
@@ -37,8 +47,11 @@ final class MovimientoController extends AbstractController
         $sizeSeparador=$this->getParameter('sizeSeparador');
         $colorSeparator=$this->getParameter('colorSeparator');
         $appLogo=$this->getParameter('logo');            
+        
+        $movimientos=$movimientoRepository->findAll();
+
         return $this->render('movimiento/index.html.twig', [
-            'movimientos' => $movimientoRepository->findAll(),
+            'movimientos' => $movimientos,
             'logo'=>$appLogo
         ]);
     }
@@ -62,13 +75,51 @@ final class MovimientoController extends AbstractController
         $iconsHeightSize=$this->getParameter('iconsHeightSize');
         $sizeSeparador=$this->getParameter('sizeSeparador');
         $colorSeparator=$this->getParameter('colorSeparator');
-        $appLogo=$this->getParameter('logo');                
+        $appLogo=$this->getParameter('logo');              
+        
+        // buscamos los materiales 
         return $this->render('movimiento/new.html.twig', [
             'movimiento' => $movimiento,
             'form' => $form,
             'logo'=>$appLogo
         ]);
     }
+
+
+    #[Route('/crear_movimiento', name: 'app_crear_movimento', methods: ['GET'])]
+    public function createMovimiento(
+        Request $request, 
+        InventarioRepository $inventarioRepository,
+        UnidadRepository $unidadRepository,
+        ProyectoRepository $proyectoRepository,
+        EntityManagerInterface $entityManager): Response
+    {
+
+        $fontSize= $this->getParameter('fontSize');
+        $iconsWidthSize=$this->getParameter('iconsWidthSize');
+        $iconsHeightSize=$this->getParameter('iconsHeightSize');
+        $sizeSeparador=$this->getParameter('sizeSeparador');
+        $colorSeparator=$this->getParameter('colorSeparator');
+        $appLogo=$this->getParameter('logo');              
+        
+        // buscamos los materiales 
+        $materiales=$inventarioRepository->findBy(['estado'=>1]);
+
+        // buscamos las unidades
+        $unidades=$unidadRepository->findBy(['estado'=>1]);
+
+        // buscamos los proyectos activos
+        $proyectos=$proyectoRepository->findBy(['estado'=>1]);
+
+        return $this->render('movimiento/new2.html.twig', [
+            'logo'=>$appLogo,
+            'materiales'=>$materiales,
+            'unidades'=>$unidades,
+            'proyectos'=>$proyectos
+        ]);
+    }
+
+     
 
     #[Route('/{id}', name: 'app_movimiento_show', methods: ['GET'])]
     public function show(Movimiento $movimiento): Response
@@ -84,6 +135,7 @@ final class MovimientoController extends AbstractController
             'logo'=>$appLogo
         ]);
     }
+
 
     #[Route('/{id}/edit', name: 'app_movimiento_edit', methods: ['GET', 'POST'])]
     public function edit(Request $request, Movimiento $movimiento, EntityManagerInterface $entityManager): Response
@@ -120,4 +172,145 @@ final class MovimientoController extends AbstractController
 
         return $this->redirectToRoute('app_movimiento_index', [], Response::HTTP_SEE_OTHER);
     }
+
+
+
+    /*
+    Esta ruta permite grabar los movimientos de materia prima
+    si es para aumentar se guarda una referencia que representa una factura o nota de entrega de materiales
+    si es para disminuir se asume que idproyecto es el proyecto donde se va a utilizar el material
+    */    
+    #[Route('/salvar_movimiento/', name: 'app_salvar_movimento', methods: ['POST'])]
+    public function saveMovimiento(
+        Request $request, 
+        InventarioRepository $inventarioRepository,
+        ProyectoRepository $proyectoRepository,
+        MovimientoRepository $movimientoRepository,
+        ManagerRegistry $doctrine): Response
+    {
+
+        $user=$this->getuser();
+        $params = $request->request->all();
+
+        /*
+        tipo:tipoV,
+        cantidad:catidadV,
+        idProyecto:idProyectoV,
+        documento:dicumentoV,
+        idMaterial:idMaterialV
+        */
+
+        $tipo=intval($params['tipo']);
+        $cantidad=floatval($params['cantidad']);
+        $idProyecto=intval($params['idProyecto']);
+        $documento=$params['documento'];
+        $idMaterial=intval($params['idMaterial']);
+        $observacion=trim($params['observacion']);
+
+        try {
+            // verificamos si movimiento es para reducir materia prima
+            if ($tipo==2){
+                // verificamos que exista un id de proyecto
+                if  ($idProyecto !=0){
+                    // buscamos el proyecto
+                    $proyecto=$proyectoRepository->find($idProyecto);
+                }
+            }
+
+            // busamos el material
+            $material=$inventarioRepository->find($idMaterial);
+
+            // validamos que se pueda hacer laoperacion desade el punto de vista de inventario
+            $sePuede=false;
+            $saldoInicial=$material->getExistencia();
+            $saldoFinal=0.00;
+            if ($tipo==1){
+                $saldoFinal=$saldoInicial+$cantidad;
+                $sePuede=true;
+            }  else {
+                $saldoFinal=$saldoInicial-$cantidad;
+                if ($saldoFinal>=0){
+                    $sePuede=true;
+                } else {
+                    $sePuede=false;
+                }
+            
+            }
+
+            if ($sePuede){
+                /*
+                estructura de la tabla movimiento
+                id	int(11) AI PK
+                tipo	int(11)
+                cantidad	decimal(13,2)
+                inicial	decimal(13,2)
+                final	decimal(13,2)
+                proyecto	int(11)
+                documento	varchar(50)
+                estado	int(11)
+                fecha_act	datetime
+                inventario_id	int(11)
+                unidad_id	int(11)
+                usuario_id	int(11)
+                observacion	longtext     
+                */
+                // creamos el nuevo registro 
+                $newMovimiento = new Movimiento();
+
+                $fecha=new DateTime();
+
+                $newMovimiento->setTipo($tipo);
+                $newMovimiento->setCantidad($cantidad);
+                $newMovimiento->setInicial($saldoInicial);
+                $newMovimiento->setFinal($saldoFinal);
+                $newMovimiento->setProyecto($idProyecto);
+                $newMovimiento->setDocumento($documento);
+                $newMovimiento->setEstado(1);
+                $newMovimiento->setFechaAct($fecha);
+                $newMovimiento->setInventario($material);
+                $newMovimiento->setUnidad($material->getUnidad());
+                $newMovimiento->setUsuario($user);
+                $newMovimiento->setObservacion($observacion);
+
+                $entityManager = $doctrine->getManager();
+                $entityManager->persist($newMovimiento);
+                $entityManager->flush();  
+                
+                // actualizamos la existencia
+                if ($newMovimiento){
+                    $material->setExistencia($saldoFinal);
+                    $material->setFechaAct($fecha); 
+
+                    $entityManager = $doctrine->getManager();
+                    $entityManager->persist($material);
+                    $entityManager->flush();       
+                    $respuesta= ['valor'=>"1",'mensaje'=>'Se insertó el movimiento con exito'];
+                    
+                }
+
+                return new JsonResponse ($respuesta) ;
+                // validamos si se obtuvieron datos 
+                /*
+                if (count($arregloPrecio)> 0){
+                    $precio=$arregloPrecio[0]['PREC_VTA1'];
+                    $respuesta= ['valor'=>"1",'precio'=>$precio,"query"=>$query];
+                }  else {
+                    $precio=0.00;
+                    $respuesta= ['valor'=>"-1",'precio'=>$precio,"query"=>$query];                
+                }*/            
+
+            } else {
+                $respuesta= ['valor'=>"-1",'mensaje'=>'No posee material suficiente en inventario para registrar el movimiento'];
+            }
+
+            return new JsonResponse ($respuesta) ;
+        } catch (\Exception $e) {
+            // Manejo del error
+            $respuesta= ['valor'=>"-3",'mensaje'=>"Ocurrió un error que no pudo ser controlado ".$e->getMessage()];
+            return new JsonResponse ($respuesta) ;
+        }
+
+
+    }   
+  
 }

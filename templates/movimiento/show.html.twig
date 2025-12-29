@@ -1,54 +1,171 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Movimiento{% endblock %}
+{% block title %}Movimeinto de Inventario{% endblock %}
 
 {% block body %}
-    <h1>Movimiento</h1>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
+            <i class="fas fa-bars"></i>
+        </button>
+        <a class="navbar-brand" href="#">
+           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>        
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-user-circle mr-1"></i> Perfil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#"><i class="fas fa-cog mr-1"></i> Configuración</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout"><i class="fas fa-sign-out-alt mr-1"></i> Salir</a>
+                </li>
+            </ul>
+        </div>
+    </nav>    
+    <!-- Sidebar -->
+    {% include 'navigation_admin.html.twig' %}
+    <!-- Contenido Principal -->
+    <div id="content">
+        <div class="row" style="padding-top:50px !important">
+            <div class="col-11 col-md-5 col-lg-5 mx-auto mt-0 mt-md-auto mb-0 mb-md-auto">
+                <div class='text-right'>
+                    <a href="{{ path('app_movimiento_index') }}" title="Regresar al Listado"><i class="fa-solid fa-list"></i></a>
+                </div>
+                <div class='card'>
+                    <div class='card-header'>
+                        <h2>Movimeinto de Inventario</h2>
+                    </div>
+                    <div class='card-body'>
+                        <div class='form-group'>
+                            <label for='tipo'>Tipo de operación</label>
+                            {% if movimiento.tipo == 1 %}
+                                {% set tipoV ="Ingreso" %}
+                            {% else %}
+                                {% set tipoV ="Egreso" %}
+                            {% endif %}
+                            <input type='text' class='form-control' id='idMaterial'  value='{{ tipoV }}' disabled>
+                        </div>
+                        <div class='form-group'>
+                            <label for='idMaterial'>Material</label>
+                            <input type='text' class='form-control' id='idMaterial'  value='{{ movimiento.inventario.nombre }}' disabled>                           
+                        </div>                          
+                        <div class='form-group'>
+                            <label for='cantidad'>Cantidad de Material</label>
+                            <input type='text' id='cantidad' class='form-control' type="number" id='cantidad' name='cantidad' step="0.01" min="0" placeholder="0.00" title='Cantidad de material a anexar o retirar del inventario' style='text-align:right !important'  disabled value='{{movimiento.cantidad}}'>
+                        </div>     
+                        <div class='form-group'>
+                            <label for='idProyecto'>Proyecto involucrado</label>
+                            <input id='idProyecto' class='form-control' type="text" title='Proyecto en el cual se involucró el material' disabled value='{{ movimiento.proyecto }}'>
+                        </div>
+                        <div class='form-group'>
+                            <label for='documento'>Documento</label>
+                            <input id='documento' class='form-control' type="text" title='Factura o documento que representa la adquisición del material' disabled value='{{ movimiento.documento }}'>
+                        </div>       
+                                                                                       
+                        <div class='form-group'>
+                            <label for='unidad'>Unidad involucrada</label>
+                            <input id='unidad' type='text' class='form-control' value='{{ movimiento.unidad.simbolo }}' disabled>
+                        </div>
+                        <div class='form-group'>
+                            <label for='usuario'>Usuario</label>
+                            <input id='usuario' type='text' class='form-control' value='{{ movimiento.usuario.name }}' disabled>
+                        </div>      
+                        <div class='form-group'>
+                            <label for='fecha'>Fecha</label>
+                            <input id='fecha' type='text' class='form-control' value="{{ movimiento.fechaAct ? movimiento.fechaAct|date('d/m/Y H:i') : ''  }}" disabled>
+                        </div>     
+                        <div class='form-group'>
+                            <label for='estado'>Estado</label>
+                            {% if (movimiento.estado == 1) %}
+                                {% set estadoV="Activo" %}
+                            {% else %}
+                                {% set estadoV="Inactivo" %}
+                            {% endif %}
+                            <input id='estado' type='text' class='form-control' value="{{ estadoV }}" disabled>
+                        </div>                                                                   
+                        <div class='form-group'>
+                            <label for='observacion'>Observacion</label>
+                            <textarea class='form-control' id='observacion' name='observacion' disabled>{{ movimiento.observacion }}</textarea>
+                        </div>   
+                        <div class="text-right">
+                            <a href="{{ path('app_movimiento_edit', {'id': movimiento.id}) }}"><i class="fa-regular fa-pen-to-square"></i></a>
+                        </div>                                             
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ movimiento.id }}</td>
-            </tr>
-            <tr>
-                <th>Tipo</th>
-                <td>{{ movimiento.tipo }}</td>
-            </tr>
-            <tr>
-                <th>Cantidad</th>
-                <td>{{ movimiento.cantidad }}</td>
-            </tr>
-            <tr>
-                <th>Inicial</th>
-                <td>{{ movimiento.inicial }}</td>
-            </tr>
-            <tr>
-                <th>Final</th>
-                <td>{{ movimiento.final }}</td>
-            </tr>
-            <tr>
-                <th>Proyecto</th>
-                <td>{{ movimiento.proyecto }}</td>
-            </tr>
-            <tr>
-                <th>Documento</th>
-                <td>{{ movimiento.documento }}</td>
-            </tr>
-            <tr>
-                <th>Estado</th>
-                <td>{{ movimiento.estado }}</td>
-            </tr>
-            <tr>
-                <th>Fecha_act</th>
-                <td>{{ movimiento.fechaAct ? movimiento.fechaAct|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-        </tbody>
-    </table>
+    </div>
+    <script>
+        $(document).ready(function() {
+            // Colapsar/Expandir Sidebar
+            $('#sidebarCollapse').on('click', function() {
+                $('#sidebar').toggleClass('active');
+                $('#content').toggleClass('active');
+            });
+            
+            // Hacer que los items del sidebar sean activos al hacer clic
+            $('.sidebar-item').on('click', function() {
+                $('.sidebar-item').removeClass('active');
+                $(this).addClass('active');
+            });
+        }); 
 
-    <a href="{{ path('app_movimiento_index') }}">back to list</a>
 
-    <a href="{{ path('app_movimiento_edit', {'id': movimiento.id}) }}">edit</a>
+        function cierraModal(){
+            $('#miModal').modal('hide');
+        }
 
-    {{ include('movimiento/_delete_form.html.twig') }}
+        function cierraModal2(){
+            $('#miModalProyectos').modal('hide');
+        }     
+        
+        function msgError (cadena){
+            var cadena="<span class='text-danger'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');    
+        }
+
+        function msgWarning (cadena){
+            var cadena="<span class='text-warning'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');     
+        }
+
+        function msgInfo (cadena){
+            var cadena="<span class='text-info'>"+cadena+"</span>";
+            $('#miModal').find('.modal-body').html(cadena);
+            const tituloModal = document.querySelector('#miModal .modal-title');
+            tituloModal.innerHTML = "Atención";
+            $('#miModal').modal('show');     
+        }        
+    </script>
+{% endblock %}
+{% block modales %}
+    <!-- cuadro modal  de anuncios -->
+    <div class="modal fade" id="miModal" tabindex="-1" role="dialog" aria-labelledby="miModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="miModalLabel">Título del Modal</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar" onclick="javascript:cierraModal()">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Aquí va el contenido de tu modal. Puedes incluir texto, imágenes, formularios, ¡lo que necesites!
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock %}

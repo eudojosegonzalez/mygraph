@@ -25,7 +25,38 @@ class InventarioType extends AbstractType
             ->add('codigo')
             ->add('nombre', TextType::class, ['required' => true, 'label' => 'Descripción del Material'])
             ->add('modelo')
-            ->add('existencia', NumberType::class, ['required' => true, 'label' => 'Existencia del Material'])
+            ->add(
+                'tipo',
+                ChoiceType::class,
+                [
+                    'label' => 'Tipo',
+                    'required' => true,
+                    'multiple' => false,
+                    'expanded' => false,
+                    'choices' => [
+                        'Material' => '1',
+                        'Servicio' => '2',
+                    ],
+                ]
+            )             
+            ->add('existencia', 
+                NumberType::class, 
+                ['required' => true, 
+                'label' => 'Existencia',
+                'attr' => [
+                'style' => 'text-align: right;',
+                'placeholder' => '0.00']
+                ]                                
+                )
+            ->add('critico', 
+                NumberType::class, 
+                ['required' => true, 
+                'label' => 'Cantidad Mínima Aceptable',
+                'attr' => [
+                'style' => 'text-align: right;',
+                'placeholder' => '0.00']
+                ]                                
+                )                
             ->add('unidad', EntityType::class, [
                 'class' => Unidad::class,
                 'label' => 'Unidad de Medida',
@@ -51,7 +82,25 @@ class InventarioType extends AbstractType
                     'label'=>'Fecha de Actualización',
                     'required' => true,                    
                 ]
-            );                          
+            )
+            ->add('costo', 
+                NumberType::class, 
+                ['required' => true, 
+                'label' => 'Costo',
+                'attr' => [
+                'style' => 'text-align: right;',
+                'placeholder' => '0.00']
+                ])            
+            ->add('precio',
+                NumberType::class,  
+                ['required' => true, 
+                'label' => 'Costo',
+                'attr' => [
+                'style' => 'text-align: right;',
+                'placeholder' => '0.00']
+                ]            
+            )            
+            ;                          
         ;
     }
 

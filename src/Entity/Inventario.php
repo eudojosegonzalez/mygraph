@@ -36,6 +36,18 @@ class Inventario
     #[ORM\Column(type: Types::DATE_MUTABLE)]
     private ?\DateTime $fecha_act = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 13, scale: 2)]
+    private ?string $costo = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 13, scale: 2)]
+    private ?string $precio = null;
+
+    #[ORM\Column]
+    private ?int $tipo = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 13, scale: 2)]
+    private ?string $critico = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -121,6 +133,54 @@ class Inventario
     public function setFechaAct(\DateTime $fecha_act): static
     {
         $this->fecha_act = $fecha_act;
+
+        return $this;
+    }
+
+    public function getCosto(): ?string
+    {
+        return $this->costo;
+    }
+
+    public function setCosto(string $costo): static
+    {
+        $this->costo = $costo;
+
+        return $this;
+    }
+
+    public function getPrecio(): ?string
+    {
+        return $this->precio;
+    }
+
+    public function setPrecio(string $precio): static
+    {
+        $this->precio = $precio;
+
+        return $this;
+    }
+
+    public function getTipo(): ?int
+    {
+        return $this->tipo;
+    }
+
+    public function setTipo(int $tipo): static
+    {
+        $this->tipo = $tipo;
+
+        return $this;
+    }
+
+    public function getCritico(): ?string
+    {
+        return $this->critico;
+    }
+
+    public function setCritico(string $critico): static
+    {
+        $this->critico = $critico;
 
         return $this;
     }
