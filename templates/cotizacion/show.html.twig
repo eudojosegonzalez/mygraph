@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Cotizacion{% endblock %}
+
+{% block body %}
+    <h1>Cotizacion</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ cotizacion.id }}</td>
+            </tr>
+            <tr>
+                <th>Fecha_creacion</th>
+                <td>{{ cotizacion.fechaCreacion ? cotizacion.fechaCreacion|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Fecha_actualizacion</th>
+                <td>{{ cotizacion.fechaActualizacion ? cotizacion.fechaActualizacion|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Fecha_aprobacion</th>
+                <td>{{ cotizacion.fechaAprobacion ? cotizacion.fechaAprobacion|date('Y-m-d') : '' }}</td>
+            </tr>
+            <tr>
+                <th>Estado</th>
+                <td>{{ cotizacion.estado }}</td>
+            </tr>
+            <tr>
+                <th>Monto</th>
+                <td>{{ cotizacion.monto }}</td>
+            </tr>
+            <tr>
+                <th>Por_descuento</th>
+                <td>{{ cotizacion.porDescuento }}</td>
+            </tr>
+            <tr>
+                <th>Monto_descuento</th>
+                <td>{{ cotizacion.montoDescuento }}</td>
+            </tr>
+            <tr>
+                <th>Precio</th>
+                <td>{{ cotizacion.precio }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_cotizacion_index') }}">back to list</a>
+
+    <a href="{{ path('app_cotizacion_edit', {'id': cotizacion.id}) }}">edit</a>
+
+    {{ include('cotizacion/_delete_form.html.twig') }}
+{% endblock %}
