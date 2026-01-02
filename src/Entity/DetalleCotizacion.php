@@ -54,6 +54,12 @@ class DetalleCotizacion
     #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
     private ?string $factor = null;
 
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    private ?string $porcentaje_descuento = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
+    private ?string $monto_descuento = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -199,6 +205,30 @@ class DetalleCotizacion
     public function setFactor(string $factor): static
     {
         $this->factor = $factor;
+
+        return $this;
+    }
+
+    public function getPorcentajeDescuento(): ?string
+    {
+        return $this->porcentaje_descuento;
+    }
+
+    public function setPorcentajeDescuento(string $porcentaje_descuento): static
+    {
+        $this->porcentaje_descuento = $porcentaje_descuento;
+
+        return $this;
+    }
+
+    public function getMontoDescuento(): ?string
+    {
+        return $this->monto_descuento;
+    }
+
+    public function setMontoDescuento(string $monto_descuento): static
+    {
+        $this->monto_descuento = $monto_descuento;
 
         return $this;
     }

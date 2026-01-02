@@ -80,7 +80,7 @@
                         </div>                               
                         <div class='text-center'>
                             <table class='table table-bordered table stripped'>
-                                <thead class='bg-dark text-center text-white'>
+                                <thead class='bg-dark text-center text-white tr-planificacion-head '>
                                     <tr>
                                         <th>Item</th>
                                         <th>Codigo</th>
@@ -88,7 +88,9 @@
                                         <th>Cantidad</th>
                                         <th>Costo</th>
                                         <th>Precio</th>
-                                        <th>Porcentaje</th>
+                                        <th>Porcentaje Ganancia</th>
+                                        <th>Porcentaje Descuento</th>
+                                        <th>Monto Descuento</th>
                                         <th>SubTotal</th>
                                     </tr>
                                 </thead>
@@ -168,9 +170,21 @@
                         <input type="text"  id='precioMaterial' class='form-control' style='text-align:right !important; width:95% !important' disabled >
                     </div>      
                     <div form-group>
-                        <label for='porcentajeMaterial'>Porcentaje</label>
+                        <label for='porcentajeMaterial'>Porcentaje Ganancia</label>
                         <input type="text"  id='porcentajeMaterial' class='form-control' style='text-align:right !important; width:95% !important' onchange="javascript:changePorcentaje()">
                     </div> 
+                    <div form-group>
+                        <label for='porcentajeDescuentoMaterial'>Porcentaje Descuento</label>
+                        <input type="text"  id='porcentajeDescuentoMaterial' class='form-control' style='text-align:right !important; width:95% !important' onchange="javascript:changePorcentajeDescuento()" value='0.00'>
+                    </div>   
+                    <div form-group>
+                        <label for='montoDescuentoMaterial'>Monto Descuento</label>
+                        <input type="text"  id='montoDescuentoMaterial' class='form-control' style='text-align:right !important; width:95% !important' disabled value='0.00'>
+                    </div> 
+                    <div form-group>
+                        <label for='totalMaterial'>Total</label>
+                        <input type="text"  id='totalMaterial' class='form-control' style='text-align:right !important; width:95% !important' disabled value='0.00'>
+                    </div>                                                          
                     <div class='text-right'>
                         <input type='hidden' id='renglonMaterial' styke='visibility:hidden !important'>
                         <input type='button' class='btn btn-primary' value='Procesar' onclick="javascript:procesarItem()">
