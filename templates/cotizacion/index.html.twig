@@ -67,24 +67,40 @@
                                 <th class='text-center d-none d-md-table-cell'>Monto Materiales</th>
                                 <th class='text-center d-none d-md-table-cell'>% Descuento</th>
                                 <th class='text-center d-none d-md-table-cell'>Monto Descuento</th>
-                                <th class='text-center'>Precio Venta</th>
+                                <th class='text-center'>Total</th>
                                 <th class='text-center'>Acciones</th>
                             </tr>
                         </thead>      
                         <tbody>
                             {% set i = 1 %}
                             {% for cotizacion in cotizacions %}
-                                <tr>
+                                <tr class='tr-planificacion-h'>
                                     <td class='text-center'>{{ i }}</td>
                                     <td class='text-left'>{{ cotizacion.cliente.nombre }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cotizacion.fechaCreacion ? cotizacion.fechaCreacion|date('Y-m-d') : '' }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cotizacion.fechaActualizacion ? cotizacion.fechaActualizacion|date('Y-m-d') : '' }}</td>
-                                    <td class='text-center d-none d-md-table-cell'>{{ cotizacion.fechaAprobacion ? cotizacion.fechaAprobacion|date('Y-m-d') : '' }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>{{ cotizacion.fechaCreacion ? cotizacion.fechaCreacion|date('d/m/Y') : '' }}</td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (cotizacion.fechaActualizacion|date('Y-m-d') != '1990-01-01') %}
+                                            {{ cotizacion.fechaActualizacion ? cotizacion.fechaActualizacion|date('Y-m-d') : '' }}
+                                        {% else %}
+                                            &nbsp;
+                                        {% endif %}
+                                    </td>
+                                    <td class='text-center d-none d-md-table-cell'>
+                                        {% if (cotizacion.fechaAprobacion|date('Y-m-d') != '1990-01-01') %}
+                                            {{ cotizacion.fechaAprobacion ? cotizacion.fechaAprobacion|date('d/m/Y') : '' }}
+                                        {% else %}
+                                            &nbsp;
+                                        {% endif %}                                        
+                                    </td>
                                     <td class='text-center'>
                                         {% if (cotizacion.estado == 1) %}
-                                            <span class='text-info'>Activo</span>
+                                            <span class='text-info'>En espera de Aprobacion</span>
                                         {% elseif (cotizacion.estado == 2) %}
                                             <span class='text-success'>Aprobado</span>
+                                        {% elseif (cotizacion.estado == 3) %}
+                                            <span class='text-info'>En proceso</span>                                            
+                                        {% elseif (cotizacion.estado == 4) %}
+                                            <span class='text-info'>Procesado</span>
                                         {% else %}
                                             <span class='text-danger'>Cancelado</span>
                                         {% endif %}                                            
@@ -95,7 +111,7 @@
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.precio|number_format(2,".","") }}</td>
                                     <td class='text-center'>
                                         <a href="{{ path('app_cotizacion_show', {'id': cotizacion.id}) }}" title='Ver detalles de la cotización'><i class="fa-solid fa-eye"></i></a>
-                                        <a href="{{ path('app_cotizacion_edit', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-clock"></i></a>
+                                        <a href="{{ path('app_cotizacion_edit', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"></i></a>
                                     </td>
                                 </tr>
                                 {% set i = i + 1 %}
