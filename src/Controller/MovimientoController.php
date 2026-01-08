@@ -41,7 +41,10 @@ use DateTimeInterface;
 final class MovimientoController extends AbstractController
 {
     #[Route(name: 'app_movimiento_index', methods: ['GET'])]
-    public function index(MovimientoRepository $movimientoRepository): Response
+    public function index(
+        Request $request,
+        PaginatorInterface $paginator,
+        MovimientoRepository $movimientoRepository): Response
     {
         $fontSize= $this->getParameter('fontSize');
         $iconsWidthSize=$this->getParameter('iconsWidthSize');
@@ -50,7 +53,31 @@ final class MovimientoController extends AbstractController
         $colorSeparator=$this->getParameter('colorSeparator');
         $appLogo=$this->getParameter('logo');            
         
-        $movimientos=$movimientoRepository->findAll();
+        $page=$request->query->getInt('page', 1);
+        $limit=$request->query->getInt('limit', 20);
+
+        $searchInput=$request->query->get('searchInput', "");
+
+        if ($searchInput==""){
+            // buscamos la cotizaciones 
+            $registros=$movimientoRepository->findAll();
+        } else{
+            // 1. Iniciar un QueryBuilder
+            $registros = $movimientoRepository->createQueryBuilder('m') // 'c' es el alias para Cotizacion
+            ->innerJoin('m.inventario', 'i')    // Unimos con la propiedad 'cliente' de la entidad Cotización
+            ->where('i.nombre LIKE :val or i.modelo LIKE :val')    // Filtramos por el nombre del cliente
+            ->setParameter('val', '%' . $searchInput . '%') // El comodín % permite buscar coincidencias parciales
+            ->orderBy('m.id', 'ASC')         // Opcional: ordenar por las más recientes
+            ->getQuery()
+            ->getResult();
+        }        
+
+        $movimientos = $paginator->paginate(
+            $registros, // Objeto de la consulta a paginar
+            $page, // Número de página actual
+            $limit // Cantidad de elementos por página
+        );  
+
 
         return $this->render('movimiento/index.html.twig', [
             'movimientos' => $movimientos,

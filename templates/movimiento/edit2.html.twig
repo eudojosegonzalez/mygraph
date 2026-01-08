@@ -1,14 +1,16 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Movimiento de Inventario{% endblock %}
-
+{% block scripts %}
+     <script src="../../assets/js/movimiento/edit_movimiento.js"></script>
+{% endblock %}   
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
             <i class="fas fa-bars"></i>
         </button>
         <a class="navbar-brand" href="#">
-           <img src="{{ logo }}" alt="Logo" style="height:45px !important">
+           <img src="../../{{ logo }}" alt="Logo" style="height:45px !important">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -122,122 +124,6 @@
         </div>
 
     </div>
-    <script>
-        $(document).ready(function() {
-            // Colapsar/Expandir Sidebar
-            $('#sidebarCollapse').on('click', function() {
-                $('#sidebar').toggleClass('active');
-                $('#content').toggleClass('active');
-            });
-            
-            // Hacer que los items del sidebar sean activos al hacer clic
-            $('.sidebar-item').on('click', function() {
-                $('.sidebar-item').removeClass('active');
-                $(this).addClass('active');
-            });
-        }); 
-
-        function searchProyect(){
-            $('#miModalProyectos').modal('show');
-        }
-
-        function changeMaterial(){
-            alert ("Cambiando material")
-        }
-
-        function updateMovimiento(){
-            try {
-                paso=1;
-                var idMovimientoV=document.getElementById('idMovimiento').value;
-                paso=2;
-                var estadoV=document.getElementById('estado').value;
-                paso=3;
-                var observacionV=document.getElementById('observacion').value;
-
-                paso=80;
-                $.ajax({
-                    url: "{{ path('app_actualizar_movimento') }}",
-                    type: "post",
-                    dataType: "html",
-                    data : {
-                        idMovimiento:idMovimientoV,
-                        estado:estadoV,
-                        observacion:observacionV
-
-                    }
-                }).done(function (res) {
-                    paso=81;
-                    //console.log (res);
-                    var data = JSON.parse(res); 
-                    paso=82;               
-                    console.log  (data);  
-                    paso=83;                                    
-                    if (data.valor=="1"){
-                        paso=84;
-                        cadena=data.mensaje;
-                        paso=85;
-                        msgInfo(cadena);
-                        paso=86;
-                        setTimeout(function() {
-                            window.location="{{ path('app_movimiento_index') }}";
-                        }, 5000);                    
-                    } else if (data.valor=="-1") {
-                        paso=87;
-                        cadena=data.mensaje;
-                        paso=88;
-                        msgError(cadena);
-                    } else if (data.valor=="-2") {
-                        paso=87;
-                        cadena=data.mensaje;
-                        paso=88;
-                        msgError(cadena);                        
-                    } else {
-                        paso=89;
-                        cadena="Ocurrió un error que no pudo ser controlado<br>Inténtelo de nuevo";
-                        paso(90);
-                        msgError(cadena);
-                    }
-                });   
-            } catch (error) {
-                // Código que se ejecuta si hay un error en el bloque try
-                console.error("¡Ha ocurrido un error en el procedimiento updateMovimiento");
-                console.error("Mensaje de error:", error.message,"paso:",paso);
-                console.error("Tipo de error:", error.name);
-            }  
-        }
-
-        function cierraModal(){
-            $('#miModal').modal('hide');
-        }
-
-        function cierraModal2(){
-            $('#miModalProyectos').modal('hide');
-        }     
-        
-        function msgError (cadena){
-            var cadena="<span class='text-danger'>"+cadena+"</span>";
-            $('#miModal').find('.modal-body').html(cadena);
-            const tituloModal = document.querySelector('#miModal .modal-title');
-            tituloModal.innerHTML = "Atención";
-            $('#miModal').modal('show');    
-        }
-
-        function msgWarning (cadena){
-            var cadena="<span class='text-warning'>"+cadena+"</span>";
-            $('#miModal').find('.modal-body').html(cadena);
-            const tituloModal = document.querySelector('#miModal .modal-title');
-            tituloModal.innerHTML = "Atención";
-            $('#miModal').modal('show');     
-        }
-
-        function msgInfo (cadena){
-            var cadena="<span class='text-info'>"+cadena+"</span>";
-            $('#miModal').find('.modal-body').html(cadena);
-            const tituloModal = document.querySelector('#miModal .modal-title');
-            tituloModal.innerHTML = "Atención";
-            $('#miModal').modal('show');     
-        }        
-    </script>
 {% endblock %}
 {% block modales %}
     <!-- cuadro modal  de anuncios -->

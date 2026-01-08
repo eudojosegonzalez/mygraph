@@ -46,7 +46,7 @@ final class InventarioController extends AbstractController
         $appLogo=$this->getParameter('logo');    
         
         $page=$request->query->getInt('page', 1);
-        $limit=$request->query->getInt('limit', 10);
+        $limit=$request->query->getInt('limit', 20);
 
         $searchInput=$request->query->get('searchInput', "");
 
