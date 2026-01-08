@@ -60,6 +60,12 @@ class DetalleCotizacion
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $monto_descuento = null;
 
+    #[ORM\Column]
+    private ?int $orden = null;
+
+    #[ORM\Column(type: Types::DECIMAL, precision: 5, scale: 2)]
+    private ?string $porcentaje = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -229,6 +235,30 @@ class DetalleCotizacion
     public function setMontoDescuento(string $monto_descuento): static
     {
         $this->monto_descuento = $monto_descuento;
+
+        return $this;
+    }
+
+    public function getOrden(): ?int
+    {
+        return $this->orden;
+    }
+
+    public function setOrden(int $orden): static
+    {
+        $this->orden = $orden;
+
+        return $this;
+    }
+
+    public function getPorcentaje(): ?string
+    {
+        return $this->porcentaje;
+    }
+
+    public function setPorcentaje(string $porcentaje): static
+    {
+        $this->porcentaje = $porcentaje;
 
         return $this;
     }

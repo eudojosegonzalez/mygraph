@@ -1,7 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}Cotizaciones en el Sistema{% endblock %}
-
+{% block scripts %}
+     <script src="../../assets/js/cotizacion/index_cotizacion.js"></script>
+{% endblock %}   
 {% block body %}
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <button type="button" id="sidebarCollapse" class="btn btn-dark mr-2">
@@ -47,7 +49,22 @@
                         </div>
                     {% endfor %}
                 {% endfor %}
-            </div>            
+            </div>  
+            <div class='row'>
+                <div class='col-12 col-md-8 col-lg-8 mb-0' style='margin:auto !important'>
+                    <div class="navigation">
+                        {{ knp_pagination_render(cotizaciones) }}
+                    </div>              
+                </div>
+                <div class='col-12 col-md-4 col-lg-4 text-left mb-0'>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id='searchInput' name='searchInput' placeholder="Buscar Cliente" aria-label="Buscar" aria-describedby="basic-addon2" value='{{ searchInput ?? '' }}'>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick='javascript:search()'>Buscar</button>
+                        </div>
+                    </div>                
+                </div>
+            </div>                      
             <div class="row"  style="margin:auto !important;">
                 <div class="col-12 col-md-12 col-lg-12 text-right">
                     <a href="{{ path('app_cotizacion_new2') }}" title='Nueva Cotización'><i class="fa-regular fa-square-plus"></i></a>
@@ -67,13 +84,13 @@
                                 <th class='text-center d-none d-md-table-cell'>Monto Materiales</th>
                                 <th class='text-center d-none d-md-table-cell'>% Descuento</th>
                                 <th class='text-center d-none d-md-table-cell'>Monto Descuento</th>
-                                <th class='text-center'>Total</th>
+                                <th class='text-center d-none d-md-table-cell'>Total</th>
                                 <th class='text-center'>Acciones</th>
                             </tr>
                         </thead>      
                         <tbody>
                             {% set i = 1 %}
-                            {% for cotizacion in cotizacions %}
+                            {% for cotizacion in cotizaciones %}
                                 <tr class='tr-planificacion-h'>
                                     <td class='text-center'>{{ i }}</td>
                                     <td class='text-left'>{{ cotizacion.cliente.nombre }}</td>
@@ -109,9 +126,14 @@
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.porDescuento|number_format(2,".","") }}</td>
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.montoDescuento|number_format(2,".","") }}</td>
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.precio|number_format(2,".","") }}</td>
-                                    <td class='text-center'>
-                                        <a href="{{ path('app_cotizacion_show', {'id': cotizacion.id}) }}" title='Ver detalles de la cotización'><i class="fa-solid fa-eye"></i></a>
-                                        <a href="{{ path('app_cotizacion_edit', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"></i></a>
+                                    <td class='text-center text-nowrap'>
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a href="{{ path('app_cotizacion_show', {'id': cotizacion.id}) }}" title='Ver detalles de la cotización'><i class="fa-solid fa-eye"></i></a>
+                                            <a href="{{ path('app_cotizacion_edit2', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"></i></a>
+                                            <a href="{{ path('app_cotizacion_send', {'id': cotizacion.id}) }}" title='Enviar la cotización por correo'><i class="fa-solid fa-paper-plane"></i></a>
+                                            <a href="{{ path('app_cotizacion_print', {'id': cotizacion.id}) }}" title='Imprimir la cotización'><i class="fa-solid fa-print"></i></a>
+                                            <a href="{{ path('app_cotizacion_copy', {'id': cotizacion.id}) }}" title='Repetir la cotización'><i class="fa-solid fa-clone"></i></a>
+                                        </div>
                                     </td>
                                 </tr>
                                 {% set i = i + 1 %}

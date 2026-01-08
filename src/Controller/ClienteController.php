@@ -28,17 +28,46 @@ use Symfony\Component\HttpFoundation\File\Exception\FileException;
 final class ClienteController extends AbstractController
 {
     #[Route(name: 'app_cliente_index', methods: ['GET'])]
-    public function index(ClienteRepository $clienteRepository): Response
+    public function index(
+        Request $request,
+        PaginatorInterface $paginator,
+        ClienteRepository $clienteRepository): Response
     {
         $fontSize= $this->getParameter('fontSize');
         $iconsWidthSize=$this->getParameter('iconsWidthSize');
         $iconsHeightSize=$this->getParameter('iconsHeightSize');
         $sizeSeparador=$this->getParameter('sizeSeparador');
         $colorSeparator=$this->getParameter('colorSeparator');
-        $appLogo=$this->getParameter('logo');        
+        $appLogo=$this->getParameter('logo');  
+        
+        $page=$request->query->getInt('page', 1);
+        $limit=$request->query->getInt('limit', 20);
+
+        $searchInput=$request->query->get('searchInput', "");
+
+        if ($searchInput==""){
+            // buscamos la cotizaciones 
+            $registros=$clienteRepository->findAll();
+        } else{
+            // 1. Iniciar un QueryBuilder
+            $registros = $clienteRepository->createQueryBuilder('c') // 'c' es el alias para Cotizacion
+            ->where('c.nombre LIKE :val OR c.email LIKE :val OR c.telefono LIKE :val')    // Filtramos por el nombre del cliente
+            ->setParameter('val', '%' . $searchInput . '%') // El comodín % permite buscar coincidencias parciales
+            ->orderBy('c.id', 'ASC')         // Opcional: ordenar por las más recientes
+            ->getQuery()
+            ->getResult();
+        }  
+
+        $clientes = $paginator->paginate(
+            $registros, // Objeto de la consulta a paginar
+            $page, // Número de página actual
+            $limit // Cantidad de elementos por página
+        );   
+
         return $this->render('cliente/index.html.twig', [
-            'clientes' => $clienteRepository->findAll(),
+            'clientes' => $clientes,
              'logo'=>$appLogo,
+             'searchInput'=>$searchInput,
         ]);
     }
 

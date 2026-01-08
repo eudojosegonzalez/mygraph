@@ -32,17 +32,47 @@ use Exception;
 final class InventarioController extends AbstractController
 {
     #[Route(name: 'app_inventario_index', methods: ['GET'])]
-    public function index(InventarioRepository $inventarioRepository): Response
+    public function index(
+        InventarioRepository $inventarioRepository,
+        PaginatorInterface $paginator,
+        Request $request,
+        ): Response
     {
         $fontSize= $this->getParameter('fontSize');
         $iconsWidthSize=$this->getParameter('iconsWidthSize');
         $iconsHeightSize=$this->getParameter('iconsHeightSize');
         $sizeSeparador=$this->getParameter('sizeSeparador');
         $colorSeparator=$this->getParameter('colorSeparator');
-        $appLogo=$this->getParameter('logo');           
+        $appLogo=$this->getParameter('logo');    
+        
+        $page=$request->query->getInt('page', 1);
+        $limit=$request->query->getInt('limit', 20);
+
+        $searchInput=$request->query->get('searchInput', "");
+
+        if ($searchInput==""){
+            // buscamos la cotizaciones 
+            $registros=$inventarioRepository->findAll();
+        } else{
+            // 1. Iniciar un QueryBuilder
+            $registros = $inventarioRepository->createQueryBuilder('i') // 'c' es el alias para Cotizacion
+            ->where('i.nombre LIKE :val or i.modelo like :val')    // Filtramos por el nombre del cliente
+            ->setParameter('val', '%' . $searchInput . '%') // El comodín % permite buscar coincidencias parciales
+            ->orderBy('i.id', 'ASC')         // Opcional: ordenar por las más recientes
+            ->getQuery()
+            ->getResult();
+        }  
+
+        $inventario = $paginator->paginate(
+            $registros, // Objeto de la consulta a paginar
+            $page, // Número de página actual
+            $limit // Cantidad de elementos por página
+        );         
+
         return $this->render('inventario/index.html.twig', [
-            'inventarios' => $inventarioRepository->findAll(),
+            'inventarios' => $inventario,
             'logo'=>$appLogo,
+            'searchInput'=>$searchInput,            
         ]);
     }
 
