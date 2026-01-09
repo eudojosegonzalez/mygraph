@@ -10,6 +10,8 @@ parameters:
     sizeSeparador : "28px"
     colorSeparator : "#999999"
     logo :  "assets/images/logo_mygraph.png"
+    wLogo : 30
+    hLogo : 30    
 
 services:
     # default configuration for services in *this* file
