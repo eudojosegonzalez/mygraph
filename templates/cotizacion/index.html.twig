@@ -111,16 +111,20 @@
                                     </td>
                                     <td class='text-center'>
                                         {% if (cotizacion.estado == 1) %}
-                                            <span class='text-info'>En espera de Aprobacion</span>
-                                        {% elseif (cotizacion.estado == 2) %}
-                                            <span class='text-success'>Aprobado</span>
-                                        {% elseif (cotizacion.estado == 3) %}
-                                            <span class='text-info'>En proceso</span>                                            
-                                        {% elseif (cotizacion.estado == 4) %}
-                                            <span class='text-info'>Procesado</span>
-                                        {% else %}
-                                            <span class='text-danger'>Cancelado</span>
-                                        {% endif %}                                            
+                                            <span class='text-info'>En espera de Aprobación</span>
+                                        {% elseif ((cotizacion.estado == 2)) %}
+                                            <span class='text-info'>Aprobado por el Cliente</span>
+                                        {% elseif ((cotizacion.estado == 3)) %}    
+                                            <span class='text-info'>En producción</span>
+                                        {% elseif ((cotizacion.estado == 4)) %}   
+                                            <span class='text-info'>Listo para entregar</span> 
+                                        {% elseif ((cotizacion.estado == 5)) %}   
+                                            <span class='text-info'>Listo para entregar</span>   
+                                        {% elseif ((cotizacion.estado == 6)) %}   
+                                            <span class='text-success'>Entregado</span>
+                                        {% elseif ((cotizacion.estado == 30)) %}           
+                                            <span class='text-danger'>Cancelado</span>    
+                                        {% endif %}                                           
                                     </td>
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.monto|number_format(2,".","")}}</td>
                                     <td class='text-right d-none d-md-table-cell'>{{ cotizacion.porDescuento|number_format(2,".","") }}</td>
@@ -129,10 +133,10 @@
                                     <td class='text-center text-nowrap'>
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="{{ path('app_cotizacion_show', {'id': cotizacion.id}) }}" title='Ver detalles de la cotización'><i class="fa-solid fa-eye"></i></a>
-                                            <a href="{{ path('app_cotizacion_edit2', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"></i></a>
-                                            <a href="{{ path('app_cotizacion_send', {'id': cotizacion.id}) }}" title='Enviar la cotización por correo'><i class="fa-solid fa-paper-plane"></i></a>
-                                            <a href="{{ path('app_cotizacion_print', {'id': cotizacion.id}) }}" title='Imprimir la cotización'><i class="fa-solid fa-print"></i></a>
-                                            <a href="{{ path('app_cotizacion_copy', {'id': cotizacion.id}) }}" title='Repetir la cotización'><i class="fa-solid fa-clone"></i></a>
+                                            <a href="{{ path('app_cotizacion_edit2', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"   ></i></a>
+                                            <a href="{{ path('app_cotizacion_send', {'id': cotizacion.id}) }}" title='Enviar la cotización por correo'><i class="fa-solid fa-paper-plane" style='color:#f07335'></i></a>
+                                            <a href="javascript:printCotizacion('{{ cotizacion.id}}')" title='Imprimir la cotización'><i class="fa-solid fa-print" style='color:#128f3f'></i></a>
+                                            <a href="{{ path('app_cotizacion_copy', {'id': cotizacion.id}) }}" title='Repetir la cotización'><i class="fa-solid fa-clone"  style='color:#9141ac'></i></a>
                                         </div>
                                     </td>
                                 </tr>
