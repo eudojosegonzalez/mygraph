@@ -26,6 +26,8 @@ use Doctrine\DBAL\Connection; // ¡Importante!
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use App\Service\BcvService;
 use DateTime;
 use Symfony\Component\Validator\Constraints\Date;
@@ -34,6 +36,7 @@ use function PHPSTORM_META\type;
 
 use FPDF;
 use App\Pdf\CustomPdf;
+use Symfony\Component\Mailer\Mailer;
 
 #[IsGranted("ROLE_ADMIN")]
 #[Route('/cotizacion')]
@@ -786,6 +789,557 @@ final class CotizacionController extends AbstractController
     }    
 
 
+   /* esta rutina genera el pdf de la cotizacion */
+    private function generarPdfCotizacion(
+        int $idCotizacion,
+        $inventarioRepository,
+        $cotizacionRepository,
+        $detalleCotizacionRepository,
+        $clienteRepository,
+        $entityManager       
+        ): string
+    {
+        try {
+                $paso=1;
+
+                $appLogo=$this->getParameter('logo');   
+                $wLogo= $this->getParameter('wLogo');
+                $hLogo= $this->getParameter('hLogo');            
+
+                $user=$this->getUser();
+                
+                // 2. Formatear la fecha
+                $fecha = new \DateTimeImmutable();
+                $dateFormatted = $fecha->format('d/m/Y h:i a'); 
+
+                // tomamos el id de la cotiazacion
+                $cotizacion=$cotizacionRepository->find($idCotizacion);
+
+                // tomamos el cliente
+                $cliente=$cotizacion->getCliente();
+
+                $emailCliente=$cliente->getEmail();
+
+                $idCliente=$cliente->getId();
+
+                // buscamos los detalles de la cotizacion
+                /*$detallesCotizacion=$detalleCotizacionRepository->createQueryBuilder('d')
+                ->innerJoin('d.cotizacion', 'c')
+                ->innerJoin('d.inventario', 'i')
+                ->addSelect('c', 'i')
+                ->where('d.cotizacion = :val')
+                ->setParameter('val', $idCotizacion)             
+                ->getQuery()
+                ->getResult(); */
+                
+                $detallesCotizacion=$detalleCotizacionRepository->searchDetallesCotizacion($idCotizacion);
+
+                // creamos el documento
+                /*------- segmento de impresion ------------------------------------*/
+                /*-------------------------------------------------------------*/
+                // 3. INSTANCIAR Y PASAR DATOS al constructor
+                $pdf = new CustomPdf(
+                    'P',        // Orientación
+                    'mm',       // Unidad
+                    'Letter',       // Tamaño
+                    $user->getName(), // <-- Dato del usuario
+                    $dateFormatted // <-- Dato de la fecha formateada
+                );
+
+                $pdf->AliasNbPages();
+                $pdf->SetMargins(5,5,5);
+                $pdf->SetAuthor("MYGRAPH", true);
+                $pdf->SetTitle(mb_convert_encoding('Cotización No. '.$idCotizacion, 'ISO-8859-1', 'UTF-8'));
+
+                $pdf->AddPage();
+                $yLine=10;
+
+                $nItem=1;
+                $nCantidadItems=count($detallesCotizacion);       
+
+                $TotalFactura=0.00;
+                $TotalBrutoFactura=0.00;
+                $DescuentoGlobal=0.00;
+                $PorcentajeDescuentoGlobal=0.00;
+                $TotalIva=0.00;
+
+
+                foreach ($detallesCotizacion as $row){
+                    // verificamos is imprimimos el encabezado
+                    if ($yLine==10){
+                        // imprimimos el logo
+                        $pdf->Image($appLogo, 7, 8, $wLogo,$hLogo);
+
+                        /*------ seccion del encabezado de la pagina -----*/
+                        $rifEmpresa="Prueba";
+                        $direccionEmpresa="prueba";
+                        $emailEmpresa="prueba@gmail.com";
+                        $telefonosEmpresa="prueba";
+
+                        $pdf->setY($yLine);
+                        // Set font
+                        $pdf->SetFont('Arial', '', 8);
+                        // Move to 8 cm to the right
+                        $pdf->Cell(50);
+                        // Texto centrado en una celda con cuadro 20*10 mm y salto de línea
+                        $cadena="R.I.F.:$rifEmpresa";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'L');
+                        
+                        $pdf->setX(150);
+                        $cadena="Cotizacion Nro:";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'L');
+
+                        $pdf->setX(180);
+                        $cadena=trim($idCotizacion);
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'R'); 
+
+                        // nueva linea
+                        $pdf->setY(15);
+                        $pdf->Cell(50);
+                        $cadena=$direccionEmpresa;
+                        $pdf->MultiCell(95,3,$cadena,0,'L');
+
+                        
+                        $pdf->setY(15);
+                        $pdf->setX(150);
+                        $cadena="Fecha Emis:";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'L');
+
+
+                        // 1. Tu variable con el dato de entrada
+                        //$fechaEntradaStr = $cotizacion->getFechaCreacion(); 
+                        // El formato de entrada es: YYYY-mm-dd h:i:s (o H:i:s, la diferencia no importa aquí)
+                        //$formatoEntrada = 'Y-m-d H:i:s'; 
+
+                        // 2. Crear un objeto DateTime a partir de la cadena y su formato
+                        //$dateTimeObj = \DateTime::createFromFormat($formatoEntrada, $fechaEntradaStr);
+
+                        // 3. Formatear el objeto al formato de salida deseado: d/m/Y
+                        $formatoSalida = 'd/m/Y';
+                        $fechaSalidaStr = $cotizacion->getFechaCreacion()->format($formatoSalida);
+
+                        $pdf->setY(15);
+                        $pdf->setX(180);
+                        $cadena=date("d/m/Y",strtotime($fechaSalidaStr));
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'R'); 
+
+                        $pdf->setY(20);
+                        $pdf->setX(150);
+                        $cadena="Fecha Vencimiento:";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'L');                        
+
+                        $pdf->setY(20);
+                        $pdf->setX(180);
+                        $cadena=date("d/m/Y",strtotime($fechaSalidaStr));
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,0,$cadena,0,'R');                        
+
+                        // nueva linea
+                        $pdf->setY(25);
+                        $pdf->Cell(50);
+                        $cadena="Email:$emailEmpresa";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');
+
+                        $pdf->setY(30);
+                        $pdf->setX(55);
+                        $cadena="Telefonos:$telefonosEmpresa";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');
+
+                        // lineas del encabezado
+                        $pdf->Rect(5,5,200,35);
+                        $pdf->Line(150,5,150,40);
+
+                        /*------- fin seccion del encabezado de la pagina -----*/            
+                        /*----- seccion identificacion del cliente ------*/
+                        $pdf->setY(45);
+                        $pdf->setX(10);   
+                        $cadena="Nombre del cliente:".$cliente->getNombre();
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');                 
+
+                        $pdf->setY(50);
+                        $pdf->setX(10);   
+                        $cadena=mb_convert_encoding("RIF/Cédula del cliente:".$cliente->getDocumento(), 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');  
+
+                        $pdf->setY(55);
+                        $pdf->setX(10);   
+                        $cadena=mb_convert_encoding("Teléfono del cliente:".$cliente->getTelefono(), 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');  
+
+                        $pdf->setY(60);
+                        $pdf->setX(10);   
+                        $cadena=mb_convert_encoding("Dirección del cliente:".$cliente->getDireccion(), 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'L');  
+                        /*----- fin seccion identificacion del cliente ------*/
+
+                        /*----- área de detalles -----------------*/
+                        // vamos a simular que nos devolvieron un rowId nuevo
+                        // buscamos si el numero de cotizacione existe
+
+
+                        $yLine=70;
+                        $pdf->setFont("Arial","",32);
+                        // imprimimos el numero de item
+                        $pdf->setY($yLine);
+                        $pdf->setX(5);
+                        $cadena=mb_convert_encoding("Cotización", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell(0, 10, $cadena, 0, 1, 'C');
+
+                        // 1. Definimos la posición Y donde queremos la línea
+                        // Si vienes de escribir "COTIZACIÓN", puedes usar GetY() para obtener la posición actual
+                        /*$y = $pdf->GetY() + 2; 
+
+                        // 2. Definimos el grosor de la línea (opcional, por defecto es 0.2mm)
+                        $pdf->SetLineWidth(0.5);
+
+                        // 3. Dibujamos la línea
+                        // Parámetros: Line(x1, y1, x2, y2)
+                        $pdf->Line(5, $y, $pdf->GetPageWidth() - 5, $y);
+
+                        // 4. Restauramos el grosor si es necesario
+                        $pdf->SetLineWidth(0.2);*/
+
+                        //$yLine=$pdf->getY();
+                        $pdf->setFont("Arial","",7);
+                        $nItem=1;
+
+                        $yLine= $pdf->GetY() + 5; 
+                        // encabezado de la cotizacion //
+                        // imprimimos el numero de item
+                        $pdf->setY($yLine);
+                        $pdf->setX(5);
+                        $cadena="Item";
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'C');   
+                        
+                        // imprimimos el codigo del item
+                        $pdf->setY($yLine);
+                        $pdf->setX(20);
+                        $cadena=mb_convert_encoding("Código", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'C');                   
+
+                        // imprimimos la descricpion
+                        $pdf->setY($yLine);
+                        $pdf->setX(50);
+                        $cadena=mb_convert_encoding("Descricpción", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'C');   
+
+                        // imprimimos la modelo
+                        $pdf->setY($yLine);
+                        $pdf->setX(100);
+                        $cadena=mb_convert_encoding("Modelo", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell($wStr,5,$cadena,0,'C');                   
+                        
+                        // imprimimos la cantidad
+                        $pdf->setY($yLine);
+                        $pdf->setX(120);
+                        $cadena=mb_convert_encoding("Cantidad", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell(40,5,$cadena,0,0,'R');   
+
+                        // imprimimos el precio
+                        $pdf->setY($yLine);
+                        $pdf->setX(140);
+                        $cadena=mb_convert_encoding("Precio", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell(40,5,$cadena,0,0,'R');                   
+
+                        // impromimos el total
+
+                        $pdf->setY($yLine);
+                        $pdf->setX(160);
+                        $cadena=mb_convert_encoding("SubTotal", 'ISO-8859-1', 'UTF-8');
+                        $wStr=$pdf->GetStringWidth($cadena);
+                        $pdf->Cell(40,5,$cadena,0,0,'R');   
+
+                        $yLine=$pdf->GetY() + 5;
+                        
+                        // 2. Definimos el grosor de la línea (opcional, por defecto es 0.2mm)
+                        $pdf->SetLineWidth(0.5);
+
+                        // 3. Dibujamos la línea
+                        // Parámetros: Line(x1, y1, x2, y2)
+                        $pdf->Line(5, $yLine, $pdf->GetPageWidth() -11, $yLine);            
+                        
+                        $yLine=$pdf->GetY() + 5;
+                    }
+                    // fin encabezado
+                    /*
+                    cotizacion.id,
+                    cotizacion.fecha_creacion,
+                    cotizacion.fecha_aprobacion,
+                    cotizacion.fecha_actualizacion,
+                    cotizacion.por_descuento,
+                    cotizacion.monto_descuento,
+                    detalle_cotizacion.id as id_detalle,
+                    detalle_cotizacion.cantidad,
+                    detalle_cotizacion.costo,
+                    detalle_cotizacion.precio,
+                    detalle_cotizacion.unidad_id,
+                    detalle_cotizacion.taza_aplicada,
+                    detalle_cotizacion.taza1,
+                    detalle_cotizacion.taza2,
+                    detalle_cotizacion.taza3,
+                    detalle_cotizacion.factor,
+                    detalle_cotizacion.porcentaje,
+                    detalle_cotizacion.orden,
+                    inventario.codigo,
+                    inventario.nombre,
+                    inventario.modelo,
+                    inventario.estado,
+                    unidad.simbolo
+                    */
+                    $codigo=$row["codigo"];
+                    $nombre=$row["nombre"];
+                    $cantidad=$row["cantidad"];
+                    $simbolo=$row['simbolo'];
+                    $precio=$row['precio'];
+                    $modelo=$row['modelo'];
+                    $porDesGeneral=$row['pordesgen'];
+                    $orden=$row['orden'];
+                    $pordesreng=$row['pordesreng'];
+                    $mondesreng=$row['mondesgen'];
+                    // aplicamos el descuento al renglon si existe
+                    if (floatval($pordesreng)>0.00){
+                        $precio=$precio-(($precio*$pordesreng)/100);
+                    }
+
+                    // imprimimos el numero de item
+                    $pdf->setY($yLine);
+                    $pdf->setX(5);
+                    $cadena=trim(strval($nItem));
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell($wStr,5,$cadena,0,'C');   
+                    
+                    // imprimimos el codigo del item
+                    $pdf->setY($yLine);
+                    $pdf->setX(20);
+                    $cadena=mb_convert_encoding(trim(strval($codigo)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell($wStr,5,$cadena,0,'C');                   
+
+                    // imprimimos la descricpion
+                    $pdf->setY($yLine);
+                    $pdf->setX(40);
+                    $cadena=mb_convert_encoding(trim(strval($nombre)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell($wStr,5,$cadena,0,'C');   
+
+                    // imprimimos la modelo
+                    $pdf->setY($yLine);
+                    $pdf->setX(90);
+                    $cadena=mb_convert_encoding(trim(strval($modelo)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell($wStr,5,$cadena,0,'C');                   
+                    
+                    // imprimimos la cantidad
+                    $pdf->setY($yLine);
+                    $pdf->setX(120);
+                    $cadena=mb_convert_encoding(trim(strval($cantidad)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell(40,5,$cadena,0,0,'R');   
+
+                    // imprimimos el precio
+                    $pdf->setY($yLine);
+                    $pdf->setX(140);
+                    $cadena=mb_convert_encoding(trim(strval($precio)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell(40,5,$cadena,0,0,'R');                   
+
+                    // impromimos el total
+                    $sTotal=number_format($cantidad*$precio,2,".","");
+                    $TotalBrutoFactura+=$sTotal;
+                    $pdf->setY($yLine);
+                    $pdf->setX(160);
+                    $cadena=mb_convert_encoding(trim(strval($sTotal)), 'ISO-8859-1', 'UTF-8');
+                    $wStr=$pdf->GetStringWidth($cadena);
+                    $pdf->Cell(40,5,$cadena,0,0,'R');                    
+
+                    // incremetamos el numero de item
+                    $nItem++;
+                    //$yLine=$pdf->getY()+1;
+
+                    if ($yLine>=240){
+                        // imprimimos el rectangulo de los detalles
+                        if ($nItem<$nCantidadItems){
+                            $pdf->Rect(5,85,200,200);
+                            $yFinalRectangulo=$pdf->getY();
+                            // creamos las lineas verticales
+                            $pdf->Line(15,85,15,265);
+                            $pdf->Line(40,85,40,265);
+                            $pdf->Line(90,85,90,265);
+                            $pdf->Line(140,85,140,265);
+                            $pdf->Line(165,85,165,265);
+                            $pdf->Line(185,85,185,265);
+                            $pdf->Line(205,85,205,265);                        
+                        } 
+                        // agregamos una pagina           
+                        $pdf->AddPage();
+                        // seteamos la coordenada Y
+                        $yLine=10;
+                    } else {
+                        // quedan registros o es el ultimo
+                        $yLine=$pdf->getY()+5;  
+                        if ($nItem>$nCantidadItems){
+                            $pdf->Rect(5,85,200,$yLine-85);
+                            $yFinalRectangulo=$pdf->getY();
+                            // creamos las lineas verticales
+                            $pdf->Line(15,85,15,$yLine);
+                            $pdf->Line(40,85,40,$yLine);
+                            $pdf->Line(90,85,90,$yLine);
+                            $pdf->Line(140,85,140,$yLine);
+                            $pdf->Line(165,85,165,$yLine);
+                            $pdf->Line(185,85,185,$yLine);
+                            $pdf->Line(205,85,205,$yLine);
+
+                        }
+                    } 
+                }
+                /*----- fin área de detalles -----------------*/
+                // imprimimos la informacion de los totales
+                $yNLine=$pdf->getY()+5;
+                $yLine+=5;
+                $pdf->setY($yLine);
+                $pdf->setX(140);
+                $cadena="Sub-Total:";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell($wStr,3,$cadena,0,0,"L");
+
+                $pdf->setY($yLine);
+                $pdf->setX(185);
+                $cadena=number_format(floatval($TotalBrutoFactura),2,".","");
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R");
+
+                $yLine+=5;
+                $pdf->setY($yLine);
+                $pdf->setX(140);
+                $cadena="% Desc:";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell($wStr,3,$cadena,0,0,"L");  
+
+                $pdf->setY($yLine);
+                $pdf->setX(150);
+                $cadena=number_format(floatval($porDesGeneral),2,".","")." %";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R");  
+                
+                $DescuentoGlobal=(floatval($TotalBrutoFactura)*floatval($porDesGeneral)/100);
+                //var_dump("<pre>Descuento ",$DescuentoGlobal,"</pre>");
+                $pdf->setY($yLine);
+                $pdf->setX(185);
+                $cadena=number_format(floatval($DescuentoGlobal),2,".","");
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R");                               
+    
+                $yLine+=5;
+                $pdf->setY($yLine);
+                $pdf->setX(140);
+                $cadena="I.V.A.:";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell($wStr,3,$cadena,0,0,"L");  
+
+                $pdf->setY($yLine);
+                $pdf->setX(150);
+                $cadena="16.00 %";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R"); 
+                
+                $TotalIva=(floatval($TotalBrutoFactura)-floatval($DescuentoGlobal))*16/100;
+                //var_dump("<pre>Iva ",$TotalIva,"</pre>");
+                $pdf->setY($yLine);
+                $pdf->setX(185);
+                $cadena=number_format(floatval($TotalIva),2,".","");
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R");                            
+
+
+                $yLine+=5;
+                $pdf->setY($yLine);
+                $pdf->setX(140);
+                $pdf->SetFont("Arial","B",8);
+                $cadena="Total:";
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell($wStr,3,$cadena,0,0,"L");  
+
+                $TotalFactura=floatval($TotalBrutoFactura)-floatval($DescuentoGlobal)+floatval($TotalIva);
+                //dd ($TotalFactura);
+                $pdf->setY($yLine);
+                $pdf->setX(185);
+                $cadena=number_format(floatval($TotalFactura),2,".","");
+                $wStr=$pdf->GetStringWidth($cadena);
+                $pdf->Cell(20,3,$cadena,0,0,"R"); 
+                
+                // creamos el rectangulo de los totales
+                $pdf->Rect(140,$yNLine,65,25);
+                $nYNewRect=$pdf->getY();
+                $yNLine+=4;
+                $pdf->Line(140,$yNLine,205,$yNLine);
+                $yNLine+=5;
+                $pdf->Line(140,$yNLine,205,$yNLine);
+                $yNLine+=5;
+                $pdf->Line(140,$yNLine,205,$yNLine);
+                $yNLine+=5;
+                $pdf->Line(140,$yNLine,205,$yNLine);
+
+                /*--- generacion del documento de salida -----*/
+                // 3. Generar la salida del PDF (importante: el método Output() devuelve el contenido)
+                /*
+                I: envía el fichero al navegador de forma que se usa la extensión (plug in) si está disponible.
+                D: envía el fichero al navegador y fuerza la descarga del fichero con el nombre especificado por name.
+                F: guarda el fichero en un fichero local de nombre name.
+                S: devuelve el documento como una cadena.
+                */
+
+                // verificamos is la carpeta existe
+                $permisos = 0775;
+                $rutaProyecto = $this->getParameter('kernel.project_dir');
+                $rutaPdf=$rutaProyecto."/public/assets/cotizaciones_pdf/".trim($idCliente);
+                
+                if (!is_dir($rutaPdf)) {
+                    try {
+                        // El tercer argumento 'true' crea directorios anidados si son necesarios
+                        if (!mkdir($rutaPdf, $permisos, true)) {
+                            throw new FileException('No se pudo crear el directorio.');
+                        }
+                        
+                        // La carpeta ha sido creada con los permisos 0775
+                        // Ahora es necesario cambiar el usuario y grupo
+
+                    } catch (FileException $e) {
+                        // Manejar el error de creación (p. ej., si el usuario PHP no tiene permisos de escritura)
+                        // Loggear o lanzar una excepción de aplicación
+                        throw new \RuntimeException("Error al crear la carpeta: " . $e->getMessage());
+                    }
+                }                        
+                
+                $nombreArchivo="assets/cotizaciones_pdf/".trim($idCliente)."/cotizacion_".trim($idCotizacion)."_".date("YmdH").".pdf";
+                
+                $pdf->Output('F', $nombreArchivo);
+
+            return $nombreArchivo;
+        } catch (\Exception $e) {
+            $mensaje="Ocurrió un error inesperado paso:".$paso." descripción del error:".$e->getMessage();
+            return $mensaje;
+        }                 
+    }
+
     /* 
     Esta funcion permite imprimr la cotizacion
     */
@@ -811,531 +1365,17 @@ final class CotizacionController extends AbstractController
             $params=$request->request->all();
 
             $idCotizacion=intval($params['idCotizacion']);
+
+            // Generamos el archivo
+            $nombreArchivo = $this->generarPdfCotizacion($idCotizacion,$inventarioRepository,$cotizacionRepository,$detalleCotizacionRepository,$clienteRepository,$entityManager);     
+
+            /*--------------------------------------------
+            codigo original ahora en generarPdfCotizacion
+            ----------------------------------------------*/
             
-            // 2. Formatear la fecha
-            $fecha = new \DateTimeImmutable();
-            $dateFormatted = $fecha->format('d/m/Y h:i a'); 
 
-            // tomamos el id de la cotiazacion
-            $cotizacion=$cotizacionRepository->find($idCotizacion);
-
-            // tomamos el cliente
-            $cliente=$cotizacion->getCliente();
-
-            $emailCliente=$cliente->getEmail();
-
-            $idCliente=$cliente->getId();
-
-            // buscamos los detalles de la cotizacion
-            /*$detallesCotizacion=$detalleCotizacionRepository->createQueryBuilder('d')
-            ->innerJoin('d.cotizacion', 'c')
-            ->innerJoin('d.inventario', 'i')
-            ->addSelect('c', 'i')
-            ->where('d.cotizacion = :val')
-            ->setParameter('val', $idCotizacion)             
-            ->getQuery()
-            ->getResult(); */
-            
-            $detallesCotizacion=$detalleCotizacionRepository->searchDetallesCotizacion($idCotizacion);
-
-            // creamos el documento
-            /*------- segmento de impresion ------------------------------------*/
-            /*-------------------------------------------------------------*/
-            // 3. INSTANCIAR Y PASAR DATOS al constructor
-            $pdf = new CustomPdf(
-                'P',        // Orientación
-                'mm',       // Unidad
-                'Letter',       // Tamaño
-                $user->getName(), // <-- Dato del usuario
-                $dateFormatted // <-- Dato de la fecha formateada
-            );
-
-            $pdf->AliasNbPages();
-            $pdf->SetMargins(5,5,5);
-            $pdf->SetAuthor("MYGRAPH", true);
-            $pdf->SetTitle(mb_convert_encoding('Cotización No. '.$idCotizacion, 'ISO-8859-1', 'UTF-8'));
-
-            $pdf->AddPage();
-            $yLine=10;
-
-            $nItem=1;
-            $nCantidadItems=count($detallesCotizacion);       
-
-            $TotalFactura=0.00;
-            $TotalBrutoFactura=0.00;
-            $DescuentoGlobal=0.00;
-            $PorcentajeDescuentoGlobal=0.00;
-            $TotalIva=0.00;
-
-
-            foreach ($detallesCotizacion as $row){
-                // verificamos is imprimimos el encabezado
-                if ($yLine==10){
-                    // imprimimos el logo
-                    $pdf->Image($appLogo, 7, 8, $wLogo,$hLogo);
-
-                    /*------ seccion del encabezado de la pagina -----*/
-                    $rifEmpresa="Prueba";
-                    $direccionEmpresa="prueba";
-                    $emailEmpresa="prueba@gmail.com";
-                    $telefonosEmpresa="prueba";
-
-                    $pdf->setY($yLine);
-                    // Set font
-                    $pdf->SetFont('Arial', '', 8);
-                    // Move to 8 cm to the right
-                    $pdf->Cell(50);
-                    // Texto centrado en una celda con cuadro 20*10 mm y salto de línea
-                    $cadena="R.I.F.:$rifEmpresa";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'L');
-                    
-                    $pdf->setX(150);
-                    $cadena="Cotizacion Nro:";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'L');
-
-                    $pdf->setX(180);
-                    $cadena=trim($idCotizacion);
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'R'); 
-
-                    // nueva linea
-                    $pdf->setY(15);
-                    $pdf->Cell(50);
-                    $cadena=$direccionEmpresa;
-                    $pdf->MultiCell(95,3,$cadena,0,'L');
-
-                    
-                    $pdf->setY(15);
-                    $pdf->setX(150);
-                    $cadena="Fecha Emis:";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'L');
-
-
-                    // 1. Tu variable con el dato de entrada
-                    //$fechaEntradaStr = $cotizacion->getFechaCreacion(); 
-                    // El formato de entrada es: YYYY-mm-dd h:i:s (o H:i:s, la diferencia no importa aquí)
-                    //$formatoEntrada = 'Y-m-d H:i:s'; 
-
-                    // 2. Crear un objeto DateTime a partir de la cadena y su formato
-                    //$dateTimeObj = \DateTime::createFromFormat($formatoEntrada, $fechaEntradaStr);
-
-                    // 3. Formatear el objeto al formato de salida deseado: d/m/Y
-                    $formatoSalida = 'd/m/Y';
-                    $fechaSalidaStr = $cotizacion->getFechaCreacion()->format($formatoSalida);
-
-                    $pdf->setY(15);
-                    $pdf->setX(180);
-                    $cadena=date("d/m/Y",strtotime($fechaSalidaStr));
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'R'); 
-
-                    $pdf->setY(20);
-                    $pdf->setX(150);
-                    $cadena="Fecha Vencimiento:";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'L');                        
-
-                    $pdf->setY(20);
-                    $pdf->setX(180);
-                    $cadena=date("d/m/Y",strtotime($fechaSalidaStr));
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,0,$cadena,0,'R');                        
-
-                    // nueva linea
-                    $pdf->setY(25);
-                    $pdf->Cell(50);
-                    $cadena="Email:$emailEmpresa";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');
-
-                    $pdf->setY(30);
-                    $pdf->setX(55);
-                    $cadena="Telefonos:$telefonosEmpresa";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');
-
-                    // lineas del encabezado
-                    $pdf->Rect(5,5,200,35);
-                    $pdf->Line(150,5,150,40);
-
-                    /*------- fin seccion del encabezado de la pagina -----*/            
-                    /*----- seccion identificacion del cliente ------*/
-                    $pdf->setY(45);
-                    $pdf->setX(10);   
-                    $cadena="Nombre del cliente:".$cliente->getNombre();
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');                 
-
-                    $pdf->setY(50);
-                    $pdf->setX(10);   
-                    $cadena=mb_convert_encoding("RIF/Cédula del cliente:".$cliente->getDocumento(), 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');  
-
-                    $pdf->setY(55);
-                    $pdf->setX(10);   
-                    $cadena=mb_convert_encoding("Teléfono del cliente:".$cliente->getTelefono(), 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');  
-
-                    $pdf->setY(60);
-                    $pdf->setX(10);   
-                    $cadena=mb_convert_encoding("Dirección del cliente:".$cliente->getDireccion(), 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'L');  
-                    /*----- fin seccion identificacion del cliente ------*/
-
-                    /*----- área de detalles -----------------*/
-                    // vamos a simular que nos devolvieron un rowId nuevo
-                    // buscamos si el numero de cotizacione existe
-
-
-                    $yLine=70;
-                    $pdf->setFont("Arial","",32);
-                    // imprimimos el numero de item
-                    $pdf->setY($yLine);
-                    $pdf->setX(5);
-                    $cadena=mb_convert_encoding("Cotización", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell(0, 10, $cadena, 0, 1, 'C');
-
-                    // 1. Definimos la posición Y donde queremos la línea
-                    // Si vienes de escribir "COTIZACIÓN", puedes usar GetY() para obtener la posición actual
-                    /*$y = $pdf->GetY() + 2; 
-
-                    // 2. Definimos el grosor de la línea (opcional, por defecto es 0.2mm)
-                    $pdf->SetLineWidth(0.5);
-
-                    // 3. Dibujamos la línea
-                    // Parámetros: Line(x1, y1, x2, y2)
-                    $pdf->Line(5, $y, $pdf->GetPageWidth() - 5, $y);
-
-                    // 4. Restauramos el grosor si es necesario
-                    $pdf->SetLineWidth(0.2);*/
-
-                    //$yLine=$pdf->getY();
-                    $pdf->setFont("Arial","",7);
-                    $nItem=1;
-
-                    $yLine= $pdf->GetY() + 5; 
-                    // encabezado de la cotizacion //
-                    // imprimimos el numero de item
-                    $pdf->setY($yLine);
-                    $pdf->setX(5);
-                    $cadena="Item";
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'C');   
-                    
-                    // imprimimos el codigo del item
-                    $pdf->setY($yLine);
-                    $pdf->setX(20);
-                    $cadena=mb_convert_encoding("Código", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'C');                   
-
-                    // imprimimos la descricpion
-                    $pdf->setY($yLine);
-                    $pdf->setX(50);
-                    $cadena=mb_convert_encoding("Descricpción", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'C');   
-
-                    // imprimimos la modelo
-                    $pdf->setY($yLine);
-                    $pdf->setX(100);
-                    $cadena=mb_convert_encoding("Modelo", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell($wStr,5,$cadena,0,'C');                   
-                    
-                    // imprimimos la cantidad
-                    $pdf->setY($yLine);
-                    $pdf->setX(120);
-                    $cadena=mb_convert_encoding("Cantidad", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell(40,5,$cadena,0,0,'R');   
-
-                    // imprimimos el precio
-                    $pdf->setY($yLine);
-                    $pdf->setX(140);
-                    $cadena=mb_convert_encoding("Precio", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell(40,5,$cadena,0,0,'R');                   
-
-                    // impromimos el total
-
-                    $pdf->setY($yLine);
-                    $pdf->setX(160);
-                    $cadena=mb_convert_encoding("SubTotal", 'ISO-8859-1', 'UTF-8');
-                    $wStr=$pdf->GetStringWidth($cadena);
-                    $pdf->Cell(40,5,$cadena,0,0,'R');   
-
-                    $yLine=$pdf->GetY() + 5;
-                    
-                    // 2. Definimos el grosor de la línea (opcional, por defecto es 0.2mm)
-                    $pdf->SetLineWidth(0.5);
-
-                    // 3. Dibujamos la línea
-                    // Parámetros: Line(x1, y1, x2, y2)
-                    $pdf->Line(5, $yLine, $pdf->GetPageWidth() -11, $yLine);            
-                    
-                    $yLine=$pdf->GetY() + 5;
-                }
-                // fin encabezado
-                /*
-                cotizacion.id,
-                cotizacion.fecha_creacion,
-                cotizacion.fecha_aprobacion,
-                cotizacion.fecha_actualizacion,
-                cotizacion.por_descuento,
-                cotizacion.monto_descuento,
-                detalle_cotizacion.id as id_detalle,
-                detalle_cotizacion.cantidad,
-                detalle_cotizacion.costo,
-                detalle_cotizacion.precio,
-                detalle_cotizacion.unidad_id,
-                detalle_cotizacion.taza_aplicada,
-                detalle_cotizacion.taza1,
-                detalle_cotizacion.taza2,
-                detalle_cotizacion.taza3,
-                detalle_cotizacion.factor,
-                detalle_cotizacion.porcentaje,
-                detalle_cotizacion.orden,
-                inventario.codigo,
-                inventario.nombre,
-                inventario.modelo,
-                inventario.estado,
-                unidad.simbolo
-                */
-                $codigo=$row["codigo"];
-                $nombre=$row["nombre"];
-                $cantidad=$row["cantidad"];
-                $simbolo=$row['simbolo'];
-                $precio=$row['precio'];
-                $modelo=$row['modelo'];
-                $porDesGeneral=$row['por_descuento'];
-                $orden=$row['orden'];
-
-                // imprimimos el numero de item
-                $pdf->setY($yLine);
-                $pdf->setX(5);
-                $cadena=trim(strval($nItem));
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell($wStr,5,$cadena,0,'C');   
-                
-                // imprimimos el codigo del item
-                $pdf->setY($yLine);
-                $pdf->setX(20);
-                $cadena=mb_convert_encoding(trim(strval($codigo)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell($wStr,5,$cadena,0,'C');                   
-
-                // imprimimos la descricpion
-                $pdf->setY($yLine);
-                $pdf->setX(40);
-                $cadena=mb_convert_encoding(trim(strval($nombre)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell($wStr,5,$cadena,0,'C');   
-
-                // imprimimos la modelo
-                $pdf->setY($yLine);
-                $pdf->setX(90);
-                $cadena=mb_convert_encoding(trim(strval($modelo)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell($wStr,5,$cadena,0,'C');                   
-                
-                // imprimimos la cantidad
-                $pdf->setY($yLine);
-                $pdf->setX(120);
-                $cadena=mb_convert_encoding(trim(strval($cantidad)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell(40,5,$cadena,0,0,'R');   
-
-                // imprimimos el precio
-                $pdf->setY($yLine);
-                $pdf->setX(140);
-                $cadena=mb_convert_encoding(trim(strval($precio)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell(40,5,$cadena,0,0,'R');                   
-
-                // impromimos el total
-                $sTotal=number_format($cantidad*$precio,2,".","");
-                $TotalBrutoFactura+=$sTotal;
-                $pdf->setY($yLine);
-                $pdf->setX(160);
-                $cadena=mb_convert_encoding(trim(strval($sTotal)), 'ISO-8859-1', 'UTF-8');
-                $wStr=$pdf->GetStringWidth($cadena);
-                $pdf->Cell(40,5,$cadena,0,0,'R');                    
-
-                // incremetamos el numero de item
-                $nItem++;
-                //$yLine=$pdf->getY()+1;
-
-                if ($yLine>=240){
-                    // imprimimos el rectangulo de los detalles
-                    if ($nItem<$nCantidadItems){
-                        $pdf->Rect(5,85,200,200);
-                        $yFinalRectangulo=$pdf->getY();
-                        // creamos las lineas verticales
-                        $pdf->Line(15,85,15,265);
-                        $pdf->Line(40,85,40,265);
-                        $pdf->Line(90,85,90,265);
-                        $pdf->Line(140,85,140,265);
-                        $pdf->Line(165,85,165,265);
-                        $pdf->Line(185,85,185,265);
-                        $pdf->Line(205,85,205,265);                        
-                    } 
-                    // agregamos una pagina           
-                    $pdf->AddPage();
-                    // seteamos la coordenada Y
-                    $yLine=10;
-                } else {
-                    // quedan registros o es el ultimo
-                    $yLine=$pdf->getY()+5;  
-                    if ($nItem>$nCantidadItems){
-                        $pdf->Rect(5,85,200,$yLine-85);
-                        $yFinalRectangulo=$pdf->getY();
-                        // creamos las lineas verticales
-                        $pdf->Line(15,85,15,$yLine);
-                        $pdf->Line(40,85,40,$yLine);
-                        $pdf->Line(90,85,90,$yLine);
-                        $pdf->Line(140,85,140,$yLine);
-                        $pdf->Line(165,85,165,$yLine);
-                        $pdf->Line(185,85,185,$yLine);
-                        $pdf->Line(205,85,205,$yLine);
-
-                    }
-                } 
-            }
-            /*----- fin área de detalles -----------------*/
-            // imprimimos la informacion de los totales
-            $yNLine=$pdf->getY()+5;
-            $yLine+=5;
-            $pdf->setY($yLine);
-            $pdf->setX(140);
-            $cadena="Sub-Total:";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell($wStr,3,$cadena,0,0,"L");
-
-            $pdf->setY($yLine);
-            $pdf->setX(185);
-            $cadena=number_format(floatval($TotalBrutoFactura),2,".","");
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R");
-
-            $yLine+=5;
-            $pdf->setY($yLine);
-            $pdf->setX(140);
-            $cadena="% Desc:";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell($wStr,3,$cadena,0,0,"L");  
-
-            $pdf->setY($yLine);
-            $pdf->setX(150);
-            $cadena=number_format(floatval($porDesGeneral),2,".","")." %";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R");  
-            
-            $DescuentoGlobal=(floatval($TotalBrutoFactura)*floatval($porDesGeneral)/100);
-            //var_dump("<pre>Descuento ",$DescuentoGlobal,"</pre>");
-            $pdf->setY($yLine);
-            $pdf->setX(185);
-            $cadena=number_format(floatval($DescuentoGlobal),2,".","");
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R");                               
-   
-            $yLine+=5;
-            $pdf->setY($yLine);
-            $pdf->setX(140);
-            $cadena="I.V.A.:";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell($wStr,3,$cadena,0,0,"L");  
-
-            $pdf->setY($yLine);
-            $pdf->setX(150);
-            $cadena="16.00 %";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R"); 
-            
-            $TotalIva=(floatval($TotalBrutoFactura)-floatval($DescuentoGlobal))*16/100;
-            //var_dump("<pre>Iva ",$TotalIva,"</pre>");
-            $pdf->setY($yLine);
-            $pdf->setX(185);
-            $cadena=number_format(floatval($TotalIva),2,".","");
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R");                            
-
-
-            $yLine+=5;
-            $pdf->setY($yLine);
-            $pdf->setX(140);
-            $pdf->SetFont("Arial","B",8);
-            $cadena="Total:";
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell($wStr,3,$cadena,0,0,"L");  
-
-            $TotalFactura=floatval($TotalBrutoFactura)-floatval($DescuentoGlobal)+floatval($TotalIva);
-            //dd ($TotalFactura);
-            $pdf->setY($yLine);
-            $pdf->setX(185);
-            $cadena=number_format(floatval($TotalFactura),2,".","");
-            $wStr=$pdf->GetStringWidth($cadena);
-            $pdf->Cell(20,3,$cadena,0,0,"R"); 
-            
-            // creamos el rectangulo de los totales
-            $pdf->Rect(140,$yNLine,65,25);
-            $nYNewRect=$pdf->getY();
-            $yNLine+=4;
-            $pdf->Line(140,$yNLine,205,$yNLine);
-            $yNLine+=5;
-            $pdf->Line(140,$yNLine,205,$yNLine);
-            $yNLine+=5;
-            $pdf->Line(140,$yNLine,205,$yNLine);
-            $yNLine+=5;
-            $pdf->Line(140,$yNLine,205,$yNLine);
-
-            /*--- generacion del documento de salida -----*/
-            // 3. Generar la salida del PDF (importante: el método Output() devuelve el contenido)
-            /*
-            I: envía el fichero al navegador de forma que se usa la extensión (plug in) si está disponible.
-            D: envía el fichero al navegador y fuerza la descarga del fichero con el nombre especificado por name.
-            F: guarda el fichero en un fichero local de nombre name.
-            S: devuelve el documento como una cadena.
-            */
-
-            // verificamos is la carpeta existe
-            $permisos = 0775;
-            $rutaProyecto = $this->getParameter('kernel.project_dir');
-            $rutaPdf=$rutaProyecto."/public/assets/cotizaciones_pdf/".trim($idCliente);
-            
-            if (!is_dir($rutaPdf)) {
-                try {
-                    // El tercer argumento 'true' crea directorios anidados si son necesarios
-                    if (!mkdir($rutaPdf, $permisos, true)) {
-                        throw new FileException('No se pudo crear el directorio.');
-                    }
-                    
-                    // La carpeta ha sido creada con los permisos 0775
-                    // Ahora es necesario cambiar el usuario y grupo
-
-                } catch (FileException $e) {
-                    // Manejar el error de creación (p. ej., si el usuario PHP no tiene permisos de escritura)
-                    // Loggear o lanzar una excepción de aplicación
-                    throw new \RuntimeException("Error al crear la carpeta: " . $e->getMessage());
-                }
-            }                        
-            
-            $nombreArchivo="assets/cotizaciones_pdf/".trim($cliente->getId())."/cotizacion_".trim($idCotizacion)."_".date("YmdH").".pdf";
-            
-            $pdf->Output('F', $nombreArchivo);
-
-
-            // Es crucial que no haya más código HTML o headers después.
-            // Como FPDF ya gestionó la salida, solo debes devolver una respuesta vacía o nula.
             $remitente="ventas@goitsolutions.org";
-            $respuesta= ['valor'=>"1",'estado'=>'creado','archivo'=>$nombreArchivo,'remitente'=>$remitente,'destinatario'=>$emailCliente];
+            $respuesta= ['valor'=>"1",'estado'=>'creado','archivo'=>$nombreArchivo,'remitente'=>$remitente];
             return new JsonResponse ($respuesta) ; 
             //return new Response('', 200, ['Content-Type' => 'application/pdf']);        
 
@@ -1355,8 +1395,7 @@ final class CotizacionController extends AbstractController
             return new JsonResponse ($respuesta) ;
         }         
     } 
-        
-
+ 
     /**
     * Esta funcion permite crear la cotizacion
     */    
@@ -1766,27 +1805,91 @@ final class CotizacionController extends AbstractController
     }
 
 
+
     /* 
     Esta funcion permite enviar la cotizacion por correo 
     */
-    #[Route('/{id}/app_cotizacion_send', name: 'app_cotizacion_send', methods: ['GET'])]
+    #[Route('/cotizacion_send/', name: 'app_cotizacion_send', methods: ['POST'])]
     public function sendCotizacion(
         Request $request,
         InventarioRepository $inventarioRepository,
         CotizacionRepository $cotizacionRepository,
         DetalleCotizacionRepository $detalleCotizacionRepository,
         ClienteRepository $clienteRepository,
-         EntityManagerInterface $entityManager,
-        ): Response
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer,
+    ): Response
     {
         try {
             $paso=1;
 
+            $appLogo=$this->getParameter('logo');  
+            $paso=2; 
+            $wLogo= $this->getParameter('wLogo');
+            $paso=3;
+            $hLogo= $this->getParameter('hLogo');            
+
+            $paso=3;
+            $user=$this->getUser();
+
+            $paso=4;
+            $params=$request->request->all();
+
+            $paso=5;
+            $idCotizacion=intval($params['idCotizacion']);
+
+            // tomamos el id de la cotiazacion
+            $paso=6;
+            $cotizacion=$cotizacionRepository->find($idCotizacion);
+
+            // tomamos el cliente
+            $paso=7;
+            $cliente=$cotizacion->getCliente();
+            // tomamos el id del cliente
+            $paso=8;
+            $idCliente=$cliente->getId();
+
+            $paso=9;
+            $emailCliente=$cliente->getEmail();            
+
+            // Generamos el archivo
+            $paso=10;
+            $nombreArchivo = $this->generarPdfCotizacion($idCotizacion,$inventarioRepository,$cotizacionRepository,$detalleCotizacionRepository,$clienteRepository,$entityManager);                 
+            
+            $paso=11;
+            $permisos = 0775;
+            $rutaProyecto = $this->getParameter('kernel.project_dir');
+            $paso=12;
+            $rutaPdf=$rutaProyecto."/public/assets/cotizaciones_pdf/".trim($idCliente)."/";
+
+            $nombre1=str_replace("assets/cotizaciones_pdf/".trim($idCliente)."/","",$nombreArchivo);
+            $nombreArchivo=$nombre1;
+            $rutaPdf.=$nombreArchivo;
+
+            // Unimos la ruta base con el nombre del archivo asegurando un solo separador
+            $paso=15;
+            //$rutaFinal = rtrim($rutaPdf, '/') . '/' . $nombreArchivo;            
+
+            // 3. Creamos el Email
+            $paso=16;
+            $email = (new Email())
+                ->from('eudojosegonzalez@gmamil.com')
+                ->to($emailCliente)
+                ->subject('Su Cotización Nro. ' . $idCotizacion)
+                ->text('Adjunto encontrará la cotización solicitada.')
+                ->attachFromPath($rutaPdf); // Adjuntamos el archivo generado
+
+            // 4. Enviamos
+            $paso=17;
+            $mailer->send($email);
+                
+            $paso=18;
             $respuesta=[
                 'valor'=>'1',
-                'mensaje'=>'Se envió la cotización con exito'
+                'mensaje'=>'Se envió la cotización con exito',
+                'emailCliente'=>$emailCliente
             ];
-            $paso=141;
+            $paso=20;
             return new JsonResponse ($respuesta);
         }  catch (\Exception $e) {
                 $respuesta=[

@@ -134,9 +134,9 @@
                                         <div class="d-flex justify-content-center gap-2">
                                             <a href="{{ path('app_cotizacion_show', {'id': cotizacion.id}) }}" title='Ver detalles de la cotización'><i class="fa-solid fa-eye"></i></a>
                                             <a href="{{ path('app_cotizacion_edit2', {'id': cotizacion.id}) }}" title='Editar la cotización'><i class="fa-regular fa-pen-to-square"   ></i></a>
-                                            <a href="{{ path('app_cotizacion_send', {'id': cotizacion.id}) }}" title='Enviar la cotización por correo'><i class="fa-solid fa-paper-plane" style='color:#f07335'></i></a>
+                                            <a href="javascript:sendCotizacion('{{ cotizacion.id}}')" title='Enviar la cotización por correo'><i class="fa-solid fa-paper-plane" style='color:#f07335'></i></a>
                                             <a href="javascript:printCotizacion('{{ cotizacion.id}}')" title='Imprimir la cotización'><i class="fa-solid fa-print" style='color:#128f3f'></i></a>
-                                            <a href="{{ path('app_cotizacion_copy', {'id': cotizacion.id}) }}" title='Repetir la cotización'><i class="fa-solid fa-clone"  style='color:#9141ac'></i></a>
+                                            <a href="javascript:copyCotizacion('{{ cotizacion.id}}')" title='Repetir la cotización'><i class="fa-solid fa-clone"  style='color:#9141ac'></i></a>
                                         </div>
                                     </td>
                                 </tr>
