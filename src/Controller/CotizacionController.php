@@ -1396,6 +1396,348 @@ final class CotizacionController extends AbstractController
         }         
     } 
  
+
+
+   /* 
+    Esta funcion permite enviar la cotizacion por correo 
+    */
+    #[Route('/cotizacion_send/', name: 'app_cotizacion_send', methods: ['POST'])]
+    public function sendCotizacion(
+        Request $request,
+        InventarioRepository $inventarioRepository,
+        CotizacionRepository $cotizacionRepository,
+        DetalleCotizacionRepository $detalleCotizacionRepository,
+        ClienteRepository $clienteRepository,
+        EntityManagerInterface $entityManager,
+        MailerInterface $mailer,
+    ): Response
+    {
+        try {
+            $paso=1;
+
+            $appLogo=$this->getParameter('logo');  
+            $paso=2; 
+            $wLogo= $this->getParameter('wLogo');
+            $paso=3;
+            $hLogo= $this->getParameter('hLogo');            
+
+            $paso=3;
+            $user=$this->getUser();
+
+            $paso=4;
+            $params=$request->request->all();
+
+            $paso=5;
+            $idCotizacion=intval($params['idCotizacion']);
+
+            // tomamos el id de la cotiazacion
+            $paso=6;
+            $cotizacion=$cotizacionRepository->find($idCotizacion);
+
+            // tomamos el cliente
+            $paso=7;
+            $cliente=$cotizacion->getCliente();
+            // tomamos el id del cliente
+            $paso=8;
+            $idCliente=$cliente->getId();
+
+            $paso=9;
+            $emailCliente=$cliente->getEmail();            
+
+            // Generamos el archivo
+            $paso=10;
+            $nombreArchivo = $this->generarPdfCotizacion($idCotizacion,$inventarioRepository,$cotizacionRepository,$detalleCotizacionRepository,$clienteRepository,$entityManager);                 
+            
+            $paso=11;
+            $permisos = 0775;
+            $rutaProyecto = $this->getParameter('kernel.project_dir');
+            $paso=12;
+            $rutaPdf=$rutaProyecto."/public/assets/cotizaciones_pdf/".trim($idCliente)."/";
+
+            $nombre1=str_replace("assets/cotizaciones_pdf/".trim($idCliente)."/","",$nombreArchivo);
+            $nombreArchivo=$nombre1;
+            $rutaPdf.=$nombreArchivo;
+
+            // Unimos la ruta base con el nombre del archivo asegurando un solo separador
+            $paso=15;
+            //$rutaFinal = rtrim($rutaPdf, '/') . '/' . $nombreArchivo;            
+
+            // 3. Creamos el Email
+            $paso=16;
+            $email = (new Email())
+                ->from('eudojosegonzalez@gmamil.com')
+                ->to($emailCliente)
+                ->subject('Su Cotización Nro. ' . $idCotizacion)
+                ->text('Adjunto encontrará la cotización solicitada.')
+                ->attachFromPath($rutaPdf); // Adjuntamos el archivo generado
+
+            // 4. Enviamos
+            $paso=17;
+            $mailer->send($email);
+                
+            $paso=18;
+            $respuesta=[
+                'valor'=>'1',
+                'mensaje'=>'Se envió la cotización con exito',
+                'emailCliente'=>$emailCliente
+            ];
+            $paso=20;
+            return new JsonResponse ($respuesta);
+        }  catch (\Exception $e) {
+                $respuesta=[
+                    "valor" => "-3",
+                    "mensaje"=>"Ocurrió un error inesperado paso:".$paso." descripción del error:".$e->getMessage(),
+                ];            
+            return new JsonResponse ($respuesta) ;
+        }         
+    }    
+ 
+
+    /*
+    Esta funcion permite duplicar una cotizacion
+    */   
+    #[Route('/cotizacion_copy/', name: 'app_cotizacion_copy', methods: ['POST'])]
+    public function copyCotizacion(
+        Request $request,
+        InventarioRepository $inventarioRepository,
+        CotizacionRepository $cotizacionRepository,
+        DetalleCotizacionRepository $detalleCotizacionRepository,
+        ClienteRepository $clienteRepository,
+         EntityManagerInterface $entityManager,
+        ): Response
+    {
+        try {
+            $paso=1;
+
+            $user=$this->getUser();
+
+            $paso=2;
+            $params=$request->request->all();
+
+            $paso=3;
+            $idCotizacion=intval($params['idCotizacion']);
+
+            // buscamos la cotizacion
+            $paso=4;
+            $cotizacion=$cotizacionRepository->find($idCotizacion);
+
+            $paso=5;
+            if ($cotizacion){
+                $paso=6;
+                // buscamos los detalles de la cotizacion
+                $detallesCotizacion=$detalleCotizacionRepository->findBy(['cotizacion'=>$idCotizacion]);
+
+                $paso=7;
+                if ($detallesCotizacion){
+                    // creamos la nueva cotizacion
+                    $paso=8;
+                    $newCotizacion = new Cotizacion();
+
+
+                    //obtenemos la fecha del servidor 
+                    $paso=23;
+                    $fecha= new DateTime();
+                    $paso=24;
+                    $fecha2 = new \DateTime('1990-01-01');
+                    
+                    // creamos la cotizacion
+                    $paso=25;
+                    $newCotizacion=new Cotizacion();
+                    /*
+                    `id` int(11) NOT NULL AUTO_INCREMENT,
+                    `fecha_creacion` date NOT NULL,
+                    `fecha_actualizacion` date NOT NULL,
+                    `fecha_aprobacion` date NOT NULL,
+                    `estado` int(11) NOT NULL,
+                    `monto` decimal(13,2) NOT NULL,
+                    `por_descuento` decimal(5,2) NOT NULL,
+                    `monto_descuento` decimal(13,2) NOT NULL,
+                    `precio` decimal(13,2) NOT NULL,
+                    `cliente_id` int(11) NOT NULL,
+                    `usuario_id` int(11) NOT NULL,
+                    */
+
+                    $paso=26;
+                    $newCotizacion->setFechaCreacion($fecha);
+                    $paso=27;
+                    $newCotizacion->setFechaActualizacion($fecha2);
+                    $paso=28;
+                    $newCotizacion->setFechaAprobacion($fecha2);
+                    $paso=29;
+                    $newCotizacion->setEstado(1);//1 creada 2 aprobada por cliente 3 procesada 4 anulada
+                    $paso=30;
+                    $newCotizacion->setMonto($cotizacion->getMonto()); // esto representa el monto bruto de la cotizacion
+                    $paso=31;
+                    $newCotizacion->setPorDescuento($cotizacion->getPorDescuento()); // esto es el porcentaje de descuento aplicado
+                    $paso=32;
+                    $newCotizacion->setMontoDescuento($cotizacion->getMontoDescuento()); // el monto del descuento aplicado
+                    $paso=33;
+                    $newCotizacion->setPrecio($cotizacion->getPrecio()); // esto representa el monto a pagar por el cliente
+                    $paso=34;
+                    $newCotizacion->setCliente($cotizacion->getCliente());
+                    $paso=35; 
+                    $newCotizacion->setUsuario($user);
+                    
+                    $paso=36;
+                    $entityManager->persist($newCotizacion);
+                    $paso=37;
+                    $entityManager->flush();
+
+                    $paso=51;
+                    // guardamos losa detalles de la cotizacion
+                    // obtenemos el id de la cotizacion
+                    $idCotizacion=$newCotizacion->getId();
+
+                    // recorremos el arreglo de los detalles de cotizacion para crear tantos registros como filas hay en el arreglo
+                    $paso=52;
+                    $orden=1;
+                    foreach ($detallesCotizacion as $row){
+                        $paso=53;
+                        /*
+                        estructura del arreglo
+                        id: 1, 
+                        codigo: '', 
+                        descripcion: '', 
+                        cantidad: 0, 
+                        costo:0.00,
+                        precio:0.00,
+                        porcentaje:0.00,
+                        idmaterial:0,
+                        porcentajeDescuento:0.00,
+                        montoDescuento:0.00,
+                        subtotal: 0.00 
+                        */
+                        $paso=54;
+                        $codigo=$row->getInventario()->getCodigo(); // codigo del material a cotizar
+                        $paso=55;
+                        $descripcion=$row->getInventario()->getNombre(); // descripcion del material a cotizar
+                        $paso=56;
+                        $cantidad=$row->getCantidad(); // cantidad de material a cotizar
+                        $paso=57;
+                        $costo=$row->getCosto(); // costo del material a cotizar
+                        $paso=58;
+                        $precio=$row->getPrecio(); // precio de venta del material a cotizar
+                        $paso=59;
+                        $porcentaje=$row->getPorcentaje(); // porcentaje de ganancia del material a cotizar
+                        $paso=60;
+                        $material=$row->getInventario(); // ide del material a utilizar en la cotizacion
+                        $paso=61;
+                        $porcentajeDescuento=$row->getPorcentajeDescuento(); // porcentaje de descuento aplicado al material
+                        $paso=62;
+                        $montoDescuento=$row->getMontoDescuento(); // monto del descuento aplicado al material a utilizar
+                        $paso=63;
+                        $tasaAplicada=$row->getTazaAplicada();
+                        $paso=64;
+                        $tasa1=$row->getTaza1();
+                        $paso=65;
+                        $tasa2=$row->getTaza2();
+                        $paso=66;
+                        $tasa3=$row->getTaza3();
+                        $paso=67;
+                        $unidad=$row->getUnidad();    
+                        $paso=68;
+                        $orden=$row->getOrden();        
+                        $paso=69;
+                        $cliente=$cotizacion->getCliente();            
+
+
+
+                        /*
+                        estructura de la tabla
+                        `id` int(11) NOT NULL AUTO_INCREMENT,
+                        `cantidad` decimal(13,2) NOT NULL,
+                        `costo` decimal(13,2) NOT NULL,
+                        `precio` decimal(13,2) NOT NULL,
+                        `cliente_id` int(11) NOT NULL,
+                        `cotizacion_id` int(11) NOT NULL,
+                        `inventario_id` int(11) NOT NULL,
+                        `unidad_id` int(11) NOT NULL,
+                        `taza_aplicada` int(11) NOT NULL,
+                        `taza1` decimal(10,2) DEFAULT NULL,
+                        `taza2` decimal(10,2) DEFAULT NULL,
+                        `taza3` decimal(10,2) DEFAULT NULL,
+                        `factor` decimal(5,2) NOT NULL,
+                        `porcentaje_descuento` decimal(5,2) NOT NULL,
+                        `monto_descuento` decimal(10,2) NOT NULL,
+                        */                        
+
+                        $paso=72;
+                        $newDetalleCotizacion= new DetalleCotizacion();
+                        $paso=73;
+                        $newDetalleCotizacion->setCantidad($cantidad);
+                        $paso=74;
+                        $newDetalleCotizacion->setCosto($costo);
+                        $paso=75;
+                        $newDetalleCotizacion->setPrecio($precio);
+                        $paso=76;
+                        $newDetalleCotizacion->setCliente($cliente);
+                        $paso=77;
+                        $newDetalleCotizacion->setCotizacion($newCotizacion);
+                        $paso=78;
+                        $newDetalleCotizacion->setInventario($material);
+                        $paso=79;
+                        $newDetalleCotizacion->setUnidad($unidad);
+                        $paso=80;
+                        $newDetalleCotizacion->setTazaAplicada($tasaAplicada);
+                        $paso=81;
+                        $newDetalleCotizacion->setTaza1($tasa1);
+                        $paso=82;
+                        $newDetalleCotizacion->setTaza2($tasa2);
+                        $paso=83;
+                        $newDetalleCotizacion->setTaza3($tasa3);
+                        $paso=84;
+                        $newDetalleCotizacion->setFactor($porcentaje);
+                        $paso=85;
+                        $newDetalleCotizacion->setPorcentajeDescuento($porcentajeDescuento);
+                        $paso=86;
+                        $newDetalleCotizacion->setMontoDescuento($montoDescuento);
+                        $paso=87;
+                        $newDetalleCotizacion->setOrden($orden);
+                        $paso=88;
+                        $newDetalleCotizacion->setPorcentaje($porcentaje);                        
+
+                        $paso=89;
+                        $entityManager->persist($newDetalleCotizacion);
+                        $paso=90;
+                        $entityManager->flush();
+                        $paso=91;
+                        $orden++;
+                    }                    
+
+                    $paso=100;
+                    $respuesta=[
+                        "valor" => "1",
+                        "mensaje"=>"Cotizacion copiada con exito" ,
+                    ];            
+                    $paso=101;
+                    return new JsonResponse ($respuesta) ;                     
+                } else {
+                    $respuesta=[
+                        'valor'=>'-2',
+                        'mensaje'=>'No se encontraron los detalles de la cotización'
+                    ];
+                   return new JsonResponse ($respuesta) ;  
+                }
+
+            } else {
+                $respuesta=[
+                    'valor'=>'-2',
+                    'mensaje'=>'No se encontró la cotización'
+                ];
+                return new JsonResponse ($respuesta);
+            }
+
+        }  catch (\Exception $e) {
+                $respuesta=[
+                    "valor" => "-3",
+                    "mensaje"=>"Ocurrió un error inesperado paso:".$paso." descripción del error:".$e->getMessage(),
+                ];            
+            return new JsonResponse ($respuesta) ;
+        }         
+    }      
+    
+    
+
     /**
     * Esta funcion permite crear la cotizacion
     */    
@@ -1806,130 +2148,5 @@ final class CotizacionController extends AbstractController
 
 
 
-    /* 
-    Esta funcion permite enviar la cotizacion por correo 
-    */
-    #[Route('/cotizacion_send/', name: 'app_cotizacion_send', methods: ['POST'])]
-    public function sendCotizacion(
-        Request $request,
-        InventarioRepository $inventarioRepository,
-        CotizacionRepository $cotizacionRepository,
-        DetalleCotizacionRepository $detalleCotizacionRepository,
-        ClienteRepository $clienteRepository,
-        EntityManagerInterface $entityManager,
-        MailerInterface $mailer,
-    ): Response
-    {
-        try {
-            $paso=1;
-
-            $appLogo=$this->getParameter('logo');  
-            $paso=2; 
-            $wLogo= $this->getParameter('wLogo');
-            $paso=3;
-            $hLogo= $this->getParameter('hLogo');            
-
-            $paso=3;
-            $user=$this->getUser();
-
-            $paso=4;
-            $params=$request->request->all();
-
-            $paso=5;
-            $idCotizacion=intval($params['idCotizacion']);
-
-            // tomamos el id de la cotiazacion
-            $paso=6;
-            $cotizacion=$cotizacionRepository->find($idCotizacion);
-
-            // tomamos el cliente
-            $paso=7;
-            $cliente=$cotizacion->getCliente();
-            // tomamos el id del cliente
-            $paso=8;
-            $idCliente=$cliente->getId();
-
-            $paso=9;
-            $emailCliente=$cliente->getEmail();            
-
-            // Generamos el archivo
-            $paso=10;
-            $nombreArchivo = $this->generarPdfCotizacion($idCotizacion,$inventarioRepository,$cotizacionRepository,$detalleCotizacionRepository,$clienteRepository,$entityManager);                 
-            
-            $paso=11;
-            $permisos = 0775;
-            $rutaProyecto = $this->getParameter('kernel.project_dir');
-            $paso=12;
-            $rutaPdf=$rutaProyecto."/public/assets/cotizaciones_pdf/".trim($idCliente)."/";
-
-            $nombre1=str_replace("assets/cotizaciones_pdf/".trim($idCliente)."/","",$nombreArchivo);
-            $nombreArchivo=$nombre1;
-            $rutaPdf.=$nombreArchivo;
-
-            // Unimos la ruta base con el nombre del archivo asegurando un solo separador
-            $paso=15;
-            //$rutaFinal = rtrim($rutaPdf, '/') . '/' . $nombreArchivo;            
-
-            // 3. Creamos el Email
-            $paso=16;
-            $email = (new Email())
-                ->from('eudojosegonzalez@gmamil.com')
-                ->to($emailCliente)
-                ->subject('Su Cotización Nro. ' . $idCotizacion)
-                ->text('Adjunto encontrará la cotización solicitada.')
-                ->attachFromPath($rutaPdf); // Adjuntamos el archivo generado
-
-            // 4. Enviamos
-            $paso=17;
-            $mailer->send($email);
-                
-            $paso=18;
-            $respuesta=[
-                'valor'=>'1',
-                'mensaje'=>'Se envió la cotización con exito',
-                'emailCliente'=>$emailCliente
-            ];
-            $paso=20;
-            return new JsonResponse ($respuesta);
-        }  catch (\Exception $e) {
-                $respuesta=[
-                    "valor" => "-3",
-                    "mensaje"=>"Ocurrió un error inesperado paso:".$paso." descripción del error:".$e->getMessage(),
-                ];            
-            return new JsonResponse ($respuesta) ;
-        }         
-    }    
  
-
-    /*
-    Esta funcion permite duplicar una cotizacion
-    */   
-    #[Route('/{id}/app_cotizacion_copy', name: 'app_cotizacion_copy', methods: ['GET'])]
-    public function copyCotizacion(
-        Request $request,
-        InventarioRepository $inventarioRepository,
-        CotizacionRepository $cotizacionRepository,
-        DetalleCotizacionRepository $detalleCotizacionRepository,
-        ClienteRepository $clienteRepository,
-         EntityManagerInterface $entityManager,
-        ): Response
-    {
-        try {
-            $paso=1;
-
-            $respuesta=[
-                'valor'=>'1',
-                'mensaje'=>'Se envió la cotización con exito'
-            ];
-            $paso=141;
-            return new JsonResponse ($respuesta);
-        }  catch (\Exception $e) {
-                $respuesta=[
-                    "valor" => "-3",
-                    "mensaje"=>"Ocurrió un error inesperado paso:".$paso." descripción del error:".$e->getMessage(),
-                ];            
-            return new JsonResponse ($respuesta) ;
-        }         
-    }      
-    
 }
